@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { BoardCommunicatorService } from '../board-communicator.service';
-import { createEnemy } from '../game/enemy-factory';
+import { createEnemy } from '../game/game-objects/enemy-factory';
 
 @Component({
   selector: 'app-bottom-panel',
@@ -12,6 +12,6 @@ export class BottomPanelComponent {
 
   createEnemy() {
     const enemy = createEnemy();
-    this.boardCommunicatorService.addGameObject(enemy);
+    this.boardCommunicatorService.addEnemy(enemy);
   }
 }

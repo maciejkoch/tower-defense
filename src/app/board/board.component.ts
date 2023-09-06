@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { createGame } from '../game/game-engine';
-import { createEnemy } from '../game/enemy-factory';
-import { GameObject } from '../game/game-object.model';
+import { createEnemy } from '../game/game-objects/enemy-factory';
+import { GameObject } from '../game/game-objects/game-object.model';
 import { BoardCommunicatorService } from '../board-communicator.service';
 
 @Component({
@@ -14,10 +14,18 @@ export class BoardComponent {
 
   ngAfterViewInit() {
     const canvas = document.getElementById('board') as HTMLCanvasElement;
-    const { addGameObject, startGame } = createGame(canvas);
+    const { addGameObject, startGame } = createGame(
+      canvas,
+      (position) => {
+        this.boardCommunicatorService.onClick(position);
+      },
+      (secondsPassed) => this.boardCommunicatorService.update(secondsPassed)
+    );
     startGame();
 
     this.boardCommunicatorService.gameObjectAdded$.subscribe((gameObject) => {
+      if (!gameObject) return;
+
       addGameObject(gameObject);
     });
   }

@@ -1,6 +1,10 @@
-import { GameObject } from './game-object.model';
+import { GameObject } from './game-objects/game-object.model';
 
-export function createGame(canvas: HTMLCanvasElement) {
+export function createGame(
+  canvas: HTMLCanvasElement,
+  onClick: (position: { x: number; y: number }) => void,
+  gameUpdate: (secondsPassed: number) => void
+) {
   const ctx = canvas.getContext('2d');
 
   let secondsPassed = 0;
@@ -8,6 +12,14 @@ export function createGame(canvas: HTMLCanvasElement) {
   let movingSpeed = 10;
 
   const gameObjects: GameObject[] = [];
+
+  canvas.addEventListener('mousedown', (event) => {
+    let rect = canvas.getBoundingClientRect();
+    let x = event.clientX - rect.left;
+    let y = event.clientY - rect.top;
+
+    onClick({ x, y });
+  });
 
   function gameLoop(timeStamp: number = 0) {
     secondsPassed = (timeStamp - oldTimeStamp) / 1000;
@@ -22,6 +34,7 @@ export function createGame(canvas: HTMLCanvasElement) {
 
   function update(secondsPassed: number) {
     gameObjects.forEach((gameObject) => gameObject.update(secondsPassed));
+    gameUpdate(secondsPassed);
   }
 
   function draw() {
@@ -46,5 +59,6 @@ export function createGame(canvas: HTMLCanvasElement) {
   return {
     addGameObject,
     startGame,
+    onClick,
   };
 }
