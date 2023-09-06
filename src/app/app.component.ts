@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, inject } from '@angular/core';
 import { Component } from '@angular/core';
 import { BoardCommunicatorService } from './board-communicator.service';
-import { createHero } from './game/game-objects/hero-factory';
+import { createHero } from './game/hero/hero-factory';
 
 @Component({
   selector: 'app-root',

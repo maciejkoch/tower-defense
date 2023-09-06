@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { createGame } from '../game/game-engine';
-import { createEnemy } from '../game/game-objects/enemy-factory';
-import { GameObject } from '../game/game-objects/game-object.model';
+import { createEnemy } from '../game/enemy/enemy-factory';
+import { GameObject } from '../game/model/game-object.model';
 import { BoardCommunicatorService } from '../board-communicator.service';
 
 @Component({

@@ -1,4 +1,5 @@
-import { GameObject } from './game-object.model';
+import { Direction, Target } from '../model/position.model';
+import { GameObject } from '../model/game-object.model';
 
 export function moveObject(gameObject: GameObject, secondsPassed: number) {
   const { speed, target, position, size } = gameObject;
@@ -15,14 +16,25 @@ export function moveObject(gameObject: GameObject, secondsPassed: number) {
 
   // If the distance is smaller than the speed, we can't move any further
   if (distance < realSpeed) {
-    gameObject.target = undefined;
     return undefined;
   }
 
-  gameObject.position.x = position.x + (realSpeed * distanceX) / distance;
-  gameObject.position.y = position.y + (realSpeed * distanceY) / distance;
+  const x = position.x + (realSpeed * distanceX) / distance;
+  const y = position.y + (realSpeed * distanceY) / distance;
+  const direction = calculateDirection(distanceX, distanceY);
 
-  // calculate direction, 0 means down, 1 means left, 2 means right, 3 means up
+  return {
+    x,
+    y,
+    direction,
+  };
+}
+
+export function setTarget(gameObject: GameObject, target: Target) {
+  gameObject.target = target;
+}
+
+function calculateDirection(distanceX: number, distanceY: number): Direction {
   if (Math.abs(distanceX) > Math.abs(distanceY)) {
     if (distanceX > 0) {
       return 2;
@@ -36,11 +48,4 @@ export function moveObject(gameObject: GameObject, secondsPassed: number) {
       return 3;
     }
   }
-}
-
-export function setTarget(
-  gameObject: GameObject,
-  target: { x: number; y: number }
-) {
-  gameObject.target = target;
 }

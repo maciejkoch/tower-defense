@@ -1,4 +1,4 @@
-import { GameObject } from './game-objects/game-object.model';
+import { GameObject } from './model/game-object.model';
 
 export function createGame(
   canvas: HTMLCanvasElement,

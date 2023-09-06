@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { GameObject } from './game/game-objects/game-object.model';
-import { setTarget } from './game/game-objects/move-object';
+import { GameObject } from './game/model/game-object.model';
+import { setTarget } from './game/move/move-object';
 
 @Injectable({
   providedIn: 'root',
