@@ -1,3 +1,4 @@
+import { drawBoard } from './board/draw-board';
 import { GameObject } from './model/game-object.model';
 
 export function createGame(
@@ -40,6 +41,7 @@ export function createGame(
   function draw() {
     if (!ctx) return;
 
+    drawBoard(ctx, { width: canvas.width, height: canvas.height });
     gameObjects.forEach((gameObject) => gameObject.draw(ctx));
   }
 

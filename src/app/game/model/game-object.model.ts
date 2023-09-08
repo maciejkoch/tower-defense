@@ -5,7 +5,7 @@ import { Sprite } from '../sprite/sprite.model';
 export interface GameObject {
   sprite: Sprite;
   position: Position;
-  target?: Target;
+  target?: Target[];
 
   size: Size;
   speed: number;

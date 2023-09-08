@@ -33,14 +33,13 @@ export function createEnemy(): GameObject {
     size,
     speed: 30,
     update(secondsPassed: number) {
-      const movement = moveObject(this, secondsPassed);
-
-      if (movement) {
-        this.position = movement;
-        this.sprite.update(secondsPassed, movement);
-      } else {
-        this.sprite.reset();
-      }
+      // const movement = moveObject(this, secondsPassed);
+      // if (movement) {
+      //   this.position = movement;
+      //   this.sprite.update(secondsPassed, movement);
+      // } else {
+      //   this.sprite.reset();
+      // }
     },
     draw(ctx: CanvasRenderingContext2D) {
       this.sprite.draw(ctx);

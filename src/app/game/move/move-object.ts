@@ -1,8 +1,13 @@
-import { Direction, Target } from '../model/position.model';
+import { Direction, Position, Target } from '../model/position.model';
 import { GameObject } from '../model/game-object.model';
+import { config } from '../config';
 
-export function moveObject(gameObject: GameObject, secondsPassed: number) {
-  const { speed, target, position, size } = gameObject;
+export function moveObject(
+  gameObject: GameObject,
+  target: Target,
+  secondsPassed: number
+) {
+  const { speed, position, size } = gameObject;
 
   if (!target) {
     return undefined;
@@ -11,7 +16,7 @@ export function moveObject(gameObject: GameObject, secondsPassed: number) {
   const realSpeed = speed * secondsPassed;
 
   const distanceX = target.x - size.width / 2 - position.x;
-  const distanceY = target.y - size.height / 2 - position.y;
+  const distanceY = target.y - size.height - position.y;
   const distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
 
   // If the distance is smaller than the speed, we can't move any further
@@ -31,7 +36,17 @@ export function moveObject(gameObject: GameObject, secondsPassed: number) {
 }
 
 export function setTarget(gameObject: GameObject, target: Target) {
-  gameObject.target = target;
+  const rounded = roundToTile(target);
+  gameObject.target = [rounded];
+}
+
+function roundToTile(target: Target) {
+  const tileX = Math.floor(target.x / config.tile);
+  const tileY = Math.floor(target.y / config.tile);
+
+  const x = tileX * config.tile + config.tile / 2;
+  const y = tileY * config.tile + config.tile / 2;
+  return { x, y };
 }
 
 function calculateDirection(distanceX: number, distanceY: number): Direction {
