@@ -3,6 +3,7 @@ import { createGame } from '../game/game-engine';
 import { createEnemy } from '../game/enemy/enemy-factory';
 import { GameObject } from '../game/model/game-object.model';
 import { BoardCommunicatorService } from '../board-communicator.service';
+import { config } from '../game/config';
 
 @Component({
   selector: 'app-board',
@@ -12,9 +13,11 @@ import { BoardCommunicatorService } from '../board-communicator.service';
 export class BoardComponent {
   boardCommunicatorService = inject(BoardCommunicatorService);
 
+  config = config;
+
   ngAfterViewInit() {
     const canvas = document.getElementById('board') as HTMLCanvasElement;
-    const { addGameObject, startGame } = createGame(
+    const { addGameObject, addStaticObjects, startGame } = createGame(
       canvas,
       (position) => {
         this.boardCommunicatorService.onClick(position);
@@ -28,5 +31,11 @@ export class BoardComponent {
 
       addGameObject(gameObject);
     });
+
+    this.boardCommunicatorService.staticObjectsAdded$.subscribe(
+      (staticObjects) => {
+        addStaticObjects(staticObjects);
+      }
+    );
   }
 }

@@ -1,9 +1,14 @@
 import { config } from '../config';
-import { moveObject } from '../move/move-object';
+import { moveObject, roundToTile } from '../move/move-object';
 import { createSprite } from '../sprite/sprite-factory';
 import { Hero } from './hero.model';
 
 export function createHero(): Hero {
+  const position = roundToTile({
+    x: 200,
+    y: 200,
+  });
+
   const size = {
     width: 70,
     height: 70,
@@ -11,10 +16,7 @@ export function createHero(): Hero {
 
   const sprite = createSprite({
     img: 'assets/hero.png',
-    defaultPosition: {
-      x: 100,
-      y: 100,
-    },
+    defaultPosition: position,
     tileSize: {
       width: 120,
       height: 120,
@@ -26,10 +28,7 @@ export function createHero(): Hero {
   });
 
   return {
-    position: {
-      x: 100,
-      y: 100,
-    },
+    position,
     size,
     speed: 60,
     sprite,
@@ -47,28 +46,22 @@ export function createHero(): Hero {
         } else {
           target.shift();
         }
+      } else {
+        this.sprite.reset();
       }
-      // const movement = moveObject(this, secondsPassed);
-
-      // if (movement) {
-      //   this.position = movement;
-      //   this.sprite.update(secondsPassed, movement);
-      // } else {
-      //   this.sprite.reset();
-      // }
     },
     draw(ctx: CanvasRenderingContext2D) {
       this.sprite.draw(ctx);
 
       // draw target
       const { target = [] } = this;
-      const finalTarget = target[target.length - 1];
-      if (finalTarget) {
+
+      target.forEach((item) => {
         ctx.beginPath();
-        ctx.arc(finalTarget.x, finalTarget.y, 5, 0, 2 * Math.PI);
-        ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+        ctx.arc(item.x, item.y, 5, 0, 2 * Math.PI);
+        ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
         ctx.fill();
-      }
+      });
     },
   };
 }

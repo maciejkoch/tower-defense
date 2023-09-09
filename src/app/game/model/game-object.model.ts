@@ -13,3 +13,10 @@ export interface GameObject {
   update: (secondsPassed: number) => void;
   draw: (ctx: CanvasRenderingContext2D) => void;
 }
+
+export interface StaticObject {
+  tileX: number;
+  tileY: number;
+
+  draw: (ctx: CanvasRenderingContext2D) => void;
+}

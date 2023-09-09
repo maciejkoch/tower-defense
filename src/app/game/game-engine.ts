@@ -1,5 +1,6 @@
 import { drawBoard } from './board/draw-board';
-import { GameObject } from './model/game-object.model';
+import { config } from './config';
+import { GameObject, StaticObject } from './model/game-object.model';
 
 export function createGame(
   canvas: HTMLCanvasElement,
@@ -13,6 +14,7 @@ export function createGame(
   let movingSpeed = 10;
 
   const gameObjects: GameObject[] = [];
+  const staticObjects: StaticObject[] = [];
 
   canvas.addEventListener('mousedown', (event) => {
     let rect = canvas.getBoundingClientRect();
@@ -41,7 +43,23 @@ export function createGame(
   function draw() {
     if (!ctx) return;
 
+    // draw obstacles
+    // ctx.fillStyle = 'black';
+    // grid.forEach((row, rowIndex) => {
+    //   row.forEach((column, columnIndex) => {
+    //     if (column === 1) {
+    //       ctx.fillRect(
+    //         columnIndex * config.tile,
+    //         rowIndex * config.tile,
+    //         config.tile,
+    //         config.tile
+    //       );
+    //     }
+    //   });
+    // });
+    //---------
     drawBoard(ctx, { width: canvas.width, height: canvas.height });
+    staticObjects.forEach((staticObject) => staticObject.draw(ctx));
     gameObjects.forEach((gameObject) => gameObject.draw(ctx));
   }
 
@@ -54,13 +72,24 @@ export function createGame(
     gameObjects.push(gameObject);
   }
 
+  function addStaticObjects(items: StaticObject[]) {
+    items.forEach((item) => staticObjects.push(item));
+  }
+
   function startGame() {
     gameLoop();
   }
 
   return {
     addGameObject,
+    addStaticObjects,
     startGame,
     onClick,
   };
+}
+
+function createGrid(width: number, height: number) {
+  return Array.from({ length: width / config.tile }, () =>
+    Array.from({ length: height / config.tile }, () => 0)
+  );
 }

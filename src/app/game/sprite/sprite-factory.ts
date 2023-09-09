@@ -47,8 +47,8 @@ export function createSprite(config: SpriteConfig): Sprite {
           direction * tileSize.height,
           tileSize.width,
           tileSize.height,
-          position.x,
-          position.y,
+          position.x - size.width / 2,
+          position.y - size.height,
           size.width,
           size.height
         );
