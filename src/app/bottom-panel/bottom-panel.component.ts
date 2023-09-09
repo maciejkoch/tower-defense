@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { BoardCommunicatorService } from '../board-communicator.service';
 import { createEnemy } from '../game/enemy/enemy-factory';
+import { GameManagerService } from '../game-manager.service';
 
 @Component({
   selector: 'app-bottom-panel',
@@ -8,10 +9,10 @@ import { createEnemy } from '../game/enemy/enemy-factory';
   styleUrls: ['./bottom-panel.component.scss'],
 })
 export class BottomPanelComponent {
-  boardCommunicatorService = inject(BoardCommunicatorService);
+  gameManagerService = inject(GameManagerService);
 
   createEnemy() {
     const enemy = createEnemy();
-    this.boardCommunicatorService.addEnemy(enemy);
+    this.gameManagerService.addEnemy(enemy);
   }
 }

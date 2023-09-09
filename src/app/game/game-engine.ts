@@ -1,11 +1,12 @@
+import { GameAction } from './actions/actions';
 import { drawBoard } from './board/draw-board';
 import { config } from './config';
+import { BoardEvent } from './events/event.model';
 import { GameObject, StaticObject } from './model/game-object.model';
 
 export function createGame(
   canvas: HTMLCanvasElement,
-  onClick: (position: { x: number; y: number }) => void,
-  gameUpdate: (secondsPassed: number) => void
+  emitEvent: (event: BoardEvent) => void
 ) {
   const ctx = canvas.getContext('2d');
 
@@ -21,7 +22,10 @@ export function createGame(
     let x = event.clientX - rect.left;
     let y = event.clientY - rect.top;
 
-    onClick({ x, y });
+    emitEvent({
+      type: 'CLICK',
+      payload: { x, y },
+    });
   });
 
   function gameLoop(timeStamp: number = 0) {
@@ -37,27 +41,16 @@ export function createGame(
 
   function update(secondsPassed: number) {
     gameObjects.forEach((gameObject) => gameObject.update(secondsPassed));
-    gameUpdate(secondsPassed);
+
+    emitEvent({
+      type: 'UPDATE',
+      payload: secondsPassed,
+    });
   }
 
   function draw() {
     if (!ctx) return;
 
-    // draw obstacles
-    // ctx.fillStyle = 'black';
-    // grid.forEach((row, rowIndex) => {
-    //   row.forEach((column, columnIndex) => {
-    //     if (column === 1) {
-    //       ctx.fillRect(
-    //         columnIndex * config.tile,
-    //         rowIndex * config.tile,
-    //         config.tile,
-    //         config.tile
-    //       );
-    //     }
-    //   });
-    // });
-    //---------
     drawBoard(ctx, { width: canvas.width, height: canvas.height });
     staticObjects.forEach((staticObject) => staticObject.draw(ctx));
     gameObjects.forEach((gameObject) => gameObject.draw(ctx));
@@ -80,11 +73,20 @@ export function createGame(
     gameLoop();
   }
 
+  function handleAction(action: GameAction) {
+    switch (action.type) {
+      case 'ADD_GAME_OBJECT':
+        addGameObject(action.payload);
+        break;
+      case 'ADD_STATIC_OBJECTS':
+        addStaticObjects(action.payload);
+        break;
+    }
+  }
+
   return {
-    addGameObject,
-    addStaticObjects,
     startGame,
-    onClick,
+    handleAction,
   };
 }
 
