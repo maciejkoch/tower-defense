@@ -1,25 +1,26 @@
-import { config } from '../config';
-import { moveObject, roundToTile } from '../move/move-object';
-import { createSprite } from '../sprite/sprite-factory';
-import { Hero } from './hero.model';
+import { GameObject } from '../../game-engine/model/game-object.model';
+import { moveObject } from '../move/move-object';
+import { createSprite } from '../../game-engine/sprite/sprite-factory';
 
-export function createHero(): Hero {
-  const position = roundToTile({
-    x: 200,
-    y: 200,
-  });
-
+export function createEnemy(): GameObject {
   const size = {
-    width: 70,
-    height: 70,
+    width: 20,
+    height: 40,
   };
 
+  const randomColor = `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${
+    Math.random() * 255
+  }, 0.2)`;
+
   const sprite = createSprite({
-    img: 'assets/hero.png',
-    defaultPosition: position,
+    img: 'assets/enemy.png',
+    defaultPosition: {
+      x: 0,
+      y: 0,
+    },
     tileSize: {
-      width: 120,
-      height: 120,
+      width: 48,
+      height: 48,
     },
     size,
     frames: 3,
@@ -28,11 +29,13 @@ export function createHero(): Hero {
   });
 
   return {
-    position,
-    size,
-    speed: 60,
     sprite,
-
+    position: {
+      x: 0,
+      y: 0,
+    },
+    size,
+    speed: 30,
     update(secondsPassed: number) {
       const { target = [] } = this;
 
@@ -59,7 +62,9 @@ export function createHero(): Hero {
       target.forEach((item) => {
         ctx.beginPath();
         ctx.arc(item.x, item.y, 5, 0, 2 * Math.PI);
-        ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+        // random color
+        ctx.fillStyle = randomColor;
+        // ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
         ctx.fill();
       });
     },

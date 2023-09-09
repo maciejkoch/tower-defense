@@ -1,9 +1,7 @@
 import { Component, inject } from '@angular/core';
-import { createGame } from '../game/game-engine';
-import { createEnemy } from '../game/enemy/enemy-factory';
-import { GameObject } from '../game/model/game-object.model';
-import { BoardCommunicatorService } from '../board-communicator.service';
-import { config } from '../game/config';
+import { BoardCommunicatorService } from '../game-comunication/board-communicator.service';
+import { config } from '../config';
+import { createGame } from '../game-engine/game-engine';
 
 @Component({
   selector: 'app-board',

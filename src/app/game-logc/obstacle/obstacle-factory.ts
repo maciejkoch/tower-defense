@@ -1,5 +1,5 @@
-import { config } from '../config';
-import { StaticObject } from '../model/game-object.model';
+import { config } from '../../config';
+import { StaticObject } from '../../game-engine/model/game-object.model';
 
 export function creatObstacle(tileX: number, tileY: number): StaticObject {
   return {

@@ -1,6 +1,10 @@
-import { Direction, Position, Target } from '../model/position.model';
-import { GameObject } from '../model/game-object.model';
-import { config } from '../config';
+import {
+  Direction,
+  Position,
+  Target,
+} from '../../game-engine/model/position.model';
+import { GameObject } from '../../game-engine/model/game-object.model';
+import { config } from '../../config';
 import * as PF from 'pathfinding';
 
 export function moveObject(

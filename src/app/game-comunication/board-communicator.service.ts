@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ReplaySubject } from 'rxjs';
-import { GameAction } from './game/actions/actions';
-import { BoardEvent } from './game/events/event.model';
+import { GameAction } from './actions/actions';
+import { BoardEvent } from './events/event.model';
 
 @Injectable({
   providedIn: 'root',

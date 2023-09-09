@@ -1,9 +1,12 @@
 import { Injectable, inject } from '@angular/core';
-import { BoardCommunicatorService } from './board-communicator.service';
-import { GameObject, StaticObject } from './game/model/game-object.model';
-import { creatObstacle } from './game/obstacle/obstacle-factory';
-import { setTarget } from './game/move/move-object';
-import { config } from './game/config';
+import { BoardCommunicatorService } from '../game-comunication/board-communicator.service';
+import {
+  GameObject,
+  StaticObject,
+} from '../game-engine/model/game-object.model';
+import { creatObstacle } from './obstacle/obstacle-factory';
+import { config } from '../config';
+import { setTarget } from './move/move-object';
 
 @Injectable({
   providedIn: 'root',

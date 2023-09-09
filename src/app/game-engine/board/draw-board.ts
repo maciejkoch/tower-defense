@@ -1,4 +1,4 @@
-import { config } from '../config';
+import { config } from '../../config';
 import { Size } from '../model/size.model';
 
 export function drawBoard(ctx: CanvasRenderingContext2D, size: Size) {

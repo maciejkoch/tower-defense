@@ -1,7 +1,7 @@
-import { GameAction } from './actions/actions';
+import { GameAction } from '../game-comunication/actions/actions';
 import { drawBoard } from './board/draw-board';
-import { config } from './config';
-import { BoardEvent } from './events/event.model';
+import { config } from '../config';
+import { BoardEvent } from '../game-comunication/events/event.model';
 import { GameObject, StaticObject } from './model/game-object.model';
 
 export function createGame(
