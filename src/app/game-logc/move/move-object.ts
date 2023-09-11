@@ -45,8 +45,8 @@ export function setTarget(
   target: Target,
   obstacles: number[][]
 ) {
-  let startPos = test(gameObject.position);
-  let goalPos = test(target);
+  let startPos = positionToTile(gameObject.position);
+  let goalPos = positionToTile(target);
   const grid = new PF.Grid(obstacles);
   const finder = new PF.DijkstraFinder({
     diagonalMovement: PF.DiagonalMovement.OnlyWhenNoObstacles,
@@ -82,7 +82,7 @@ function tileToPosition(target: Target) {
   return { x, y };
 }
 
-function test(target: Target) {
+export function positionToTile(target: Target) {
   const tileX = Math.floor(target.x / config.tile);
   const tileY = Math.floor(target.y / config.tile);
   return { x: tileX, y: tileY };

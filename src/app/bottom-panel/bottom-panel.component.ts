@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { GameManagerService } from '../game-logc/game-manager.service';
 import { createEnemy } from '../game-logc/enemy/enemy-factory';
+import { createTower } from '../game-logc/tower/tower-factory';
 
 @Component({
   selector: 'app-bottom-panel',
@@ -10,8 +11,11 @@ import { createEnemy } from '../game-logc/enemy/enemy-factory';
 export class BottomPanelComponent {
   gameManagerService = inject(GameManagerService);
 
-  createEnemy() {
-    const enemy = createEnemy();
-    this.gameManagerService.addEnemy(enemy);
+  enableBuildMode() {
+    this.gameManagerService.enableBuildingMode();
+  }
+
+  enablePlayMode() {
+    this.gameManagerService.enablePlayMode();
   }
 }

@@ -6,7 +6,9 @@ import {
 } from '../game-engine/model/game-object.model';
 import { creatObstacle } from './obstacle/obstacle-factory';
 import { config } from '../config';
-import { setTarget } from './move/move-object';
+import { positionToTile, setTarget } from './move/move-object';
+import { createTower } from './tower/tower-factory';
+import { Tower } from './tower/tower.model';
 
 @Injectable({
   providedIn: 'root',
@@ -14,9 +16,12 @@ import { setTarget } from './move/move-object';
 export class GameManagerService {
   boardCommunicatorService = inject(BoardCommunicatorService);
 
+  private mode: 'BUILD' | 'PLAY' = 'PLAY';
+
   private hero?: GameObject;
   private enemies: GameObject[] = [];
   private obstacles: StaticObject[] = [];
+  private towers: Tower[] = [];
 
   constructor() {
     this.boardCommunicatorService.event$.subscribe((event) => {
@@ -56,12 +61,21 @@ export class GameManagerService {
     });
   }
 
+  enableBuildingMode() {
+    this.mode = 'BUILD';
+  }
+
+  enablePlayMode() {
+    this.mode = 'PLAY';
+  }
+
   private buildGridWithObstacles() {
     const grid = Array.from({ length: config.width / config.tile }, () =>
       Array.from({ length: config.height / config.tile }, () => 0)
     );
 
-    this.obstacles.forEach((obstacle) => {
+    const staticObjects = [...this.obstacles, ...this.towers];
+    staticObjects.forEach((obstacle) => {
       const { tileX, tileY } = obstacle;
       grid[tileY][tileX] = 1;
     });
@@ -77,9 +91,24 @@ export class GameManagerService {
     });
   }
 
+  buildTower(tower: Tower) {
+    this.towers.push(tower);
+    this.boardCommunicatorService.dispatch({
+      type: 'ADD_STATIC_OBJECTS',
+      payload: [tower],
+    });
+  }
+
   onClick(position: { x: number; y: number }) {
-    if (this.hero) {
-      setTarget(this.hero, position, this.buildGridWithObstacles());
+    if (this.mode === 'BUILD') {
+      const tile = positionToTile(position);
+      const tower = createTower(tile.x, tile.y);
+
+      this.buildTower(tower);
+    } else if (this.mode === 'PLAY') {
+      if (this.hero) {
+        setTarget(this.hero, position, this.buildGridWithObstacles());
+      }
     }
   }
 
