@@ -1,5 +1,5 @@
-import { Position } from '../model/position.model';
 import { Sprite, SpriteConfig } from './sprite.model';
+import { RelativePosition, Direction } from '../position/position.model';
 
 export function createSprite(config: SpriteConfig): Sprite {
   const image = new Image();
@@ -10,11 +10,10 @@ export function createSprite(config: SpriteConfig): Sprite {
   return {
     image,
     config,
-    position: config.defaultPosition,
 
     currentFrame: config.defaultFrame,
 
-    update(secondsPassed: number, position: Position) {
+    update(secondsPassed: number) {
       const { animationSpeed, frames } = this.config;
       totalSeconds += secondsPassed;
 
@@ -26,33 +25,30 @@ export function createSprite(config: SpriteConfig): Sprite {
           this.currentFrame = 0;
         }
       }
-
-      this.position = position;
     },
 
     reset() {
       this.currentFrame = this.config.defaultFrame;
     },
 
-    draw(ctx: CanvasRenderingContext2D) {
-      const { position } = this;
+    draw(
+      ctx: CanvasRenderingContext2D,
+      position: RelativePosition,
+      direction: Direction
+    ) {
       const { tileSize, size } = this.config;
 
-      if (position) {
-        const { direction = 0 } = position;
-
-        ctx.drawImage(
-          this.image,
-          this.currentFrame * tileSize.width,
-          direction * tileSize.height,
-          tileSize.width,
-          tileSize.height,
-          position.x - size.width / 2,
-          position.y - size.height,
-          size.width,
-          size.height
-        );
-      }
+      ctx.drawImage(
+        this.image,
+        this.currentFrame * tileSize.width,
+        direction * tileSize.height,
+        tileSize.width,
+        tileSize.height,
+        position.x - size.width / 2,
+        position.y - size.height,
+        size.width,
+        size.height
+      );
     },
   };
 }

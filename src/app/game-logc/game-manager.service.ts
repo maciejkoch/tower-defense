@@ -6,9 +6,11 @@ import {
 } from '../game-engine/model/game-object.model';
 import { creatObstacle } from './obstacle/obstacle-factory';
 import { config } from '../config';
-import { positionToTile, setTarget } from './move/move-object';
 import { createTower } from './tower/tower-factory';
 import { Tower } from './tower/tower.model';
+import { toTilePosition } from '../game-engine/position/position';
+import { RelativePosition } from '../game-engine/position/position.model';
+import { setTarget } from './move/move-object';
 
 @Injectable({
   providedIn: 'root',
@@ -45,7 +47,7 @@ export class GameManagerService {
       [8, 9],
       [9, 9],
     ];
-    const obstacles = test.map(([x, y]) => creatObstacle(x, y));
+    const obstacles = test.map(([x, y]) => creatObstacle({ x, y }));
     this.obstacles = obstacles;
     this.boardCommunicatorService.dispatch({
       type: 'ADD_STATIC_OBJECTS',
@@ -76,8 +78,8 @@ export class GameManagerService {
 
     const staticObjects = [...this.obstacles, ...this.towers];
     staticObjects.forEach((obstacle) => {
-      const { tileX, tileY } = obstacle;
-      grid[tileY][tileX] = 1;
+      const { x, y } = obstacle.position;
+      grid[y][x] = 1;
     });
 
     return grid;
@@ -99,10 +101,10 @@ export class GameManagerService {
     });
   }
 
-  onClick(position: { x: number; y: number }) {
+  onClick(position: RelativePosition) {
     if (this.mode === 'BUILD') {
-      const tile = positionToTile(position);
-      const tower = createTower(tile.x, tile.y);
+      const tilePosition = toTilePosition(position);
+      const tower = createTower(tilePosition);
 
       this.buildTower(tower);
     } else if (this.mode === 'PLAY') {

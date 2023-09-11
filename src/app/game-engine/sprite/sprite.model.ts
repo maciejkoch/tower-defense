@@ -1,16 +1,18 @@
-import { Position } from '../model/position.model';
 import { Size } from '../model/size.model';
+import { Direction, RelativePosition } from '../position/position.model';
 
 export interface Sprite {
   currentFrame: number;
   image: HTMLImageElement;
-
-  position: Position;
   config: SpriteConfig;
 
   reset: () => void;
-  update: (secondsPassed: number, position: Position) => void;
-  draw: (ctx: CanvasRenderingContext2D) => void;
+  update: (secondsPassed: number) => void;
+  draw: (
+    ctx: CanvasRenderingContext2D,
+    position: RelativePosition,
+    direction: Direction
+  ) => void;
 }
 
 export interface SpriteConfig {
@@ -20,5 +22,4 @@ export interface SpriteConfig {
   frames: number;
   defaultFrame: number;
   animationSpeed: number;
-  defaultPosition: Position;
 }

@@ -1,12 +1,12 @@
 import { createSprite } from 'src/app/game-engine/sprite/sprite-factory';
-import { moveObject, roundToTile } from '../move/move-object';
+import { moveObject } from '../move/move-object';
 import { Hero } from './hero.model';
 
 export function createHero(): Hero {
-  const position = roundToTile({
+  const position = {
     x: 200,
     y: 200,
-  });
+  };
 
   const size = {
     width: 70,
@@ -15,7 +15,6 @@ export function createHero(): Hero {
 
   const sprite = createSprite({
     img: 'assets/hero.png',
-    defaultPosition: position,
     tileSize: {
       width: 120,
       height: 120,
@@ -28,6 +27,7 @@ export function createHero(): Hero {
 
   return {
     position,
+    direction: 0,
     size,
     speed: 60,
     sprite,
@@ -40,8 +40,11 @@ export function createHero(): Hero {
         const movement = moveObject(this, nextTarget, secondsPassed);
 
         if (movement) {
-          this.position = movement;
-          this.sprite.update(secondsPassed, movement);
+          const { position, direction } = movement;
+          this.position = position;
+          this.direction = direction;
+
+          this.sprite.update(secondsPassed);
         } else {
           target.shift();
         }
@@ -50,7 +53,8 @@ export function createHero(): Hero {
       }
     },
     draw(ctx: CanvasRenderingContext2D) {
-      this.sprite.draw(ctx);
+      const { position, direction } = this;
+      this.sprite.draw(ctx, position, direction);
 
       // draw target
       const { target = [] } = this;

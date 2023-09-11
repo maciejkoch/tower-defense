@@ -1,12 +1,11 @@
-export interface Position {
-  x: number;
-  y: number;
-
-  direction?: Direction;
-}
-
-export interface Target {
+export interface RelativePosition {
   x: number;
   y: number;
 }
+
+export interface TilePosition {
+  x: number;
+  y: number;
+}
+
 export type Direction = 0 | 1 | 2 | 3;

@@ -1,18 +1,20 @@
+import { GameObject } from '../../game-engine/model/game-object.model';
+import * as PF from 'pathfinding';
 import {
   Direction,
-  Position,
-  Target,
-} from '../../game-engine/model/position.model';
-import { GameObject } from '../../game-engine/model/game-object.model';
-import { config } from '../../config';
-import * as PF from 'pathfinding';
+  RelativePosition,
+} from '../../game-engine/position/position.model';
+import {
+  toRelativePosition,
+  toTilePosition,
+} from '../../game-engine/position/position';
 
 export function moveObject(
   gameObject: GameObject,
-  target: Target,
+  target: RelativePosition,
   secondsPassed: number
 ) {
-  const { speed, position, size } = gameObject;
+  const { speed, position } = gameObject;
 
   if (!target) {
     return undefined;
@@ -34,58 +36,31 @@ export function moveObject(
   const direction = calculateDirection(distanceX, distanceY);
 
   return {
-    x,
-    y,
+    position: { x, y },
     direction,
   };
 }
 
 export function setTarget(
   gameObject: GameObject,
-  target: Target,
+  target: RelativePosition,
   obstacles: number[][]
 ) {
-  let startPos = positionToTile(gameObject.position);
-  let goalPos = positionToTile(target);
+  let start = toTilePosition(gameObject.position);
+  let goal = toTilePosition(target);
+
   const grid = new PF.Grid(obstacles);
   const finder = new PF.DijkstraFinder({
     diagonalMovement: PF.DiagonalMovement.OnlyWhenNoObstacles,
   });
-  var myPathway = finder.findPath(
-    startPos.x,
-    startPos.y,
-    goalPos.x,
-    goalPos.y,
-    grid
-  );
-  myPathway.shift();
-  // var smoothPath = PF.Util.smoothenPath(grid, myPathway);
-  const path = myPathway.map((tile) =>
-    tileToPosition({ x: tile[0], y: tile[1] })
-  );
-  // const rounded = roundToTile(target);
-  gameObject.target = path;
-}
+  var pathOfTiles = finder.findPath(start.x, start.y, goal.x, goal.y, grid);
+  pathOfTiles.shift();
 
-export function roundToTile(target: Target) {
-  const tileX = Math.floor(target.x / config.tile);
-  const tileY = Math.floor(target.y / config.tile);
-
-  const x = tileX * config.tile + config.tile / 2;
-  const y = tileY * config.tile + config.tile / 2;
-  return { x, y };
-}
-
-function tileToPosition(target: Target) {
-  const x = target.x * config.tile + config.tile / 2;
-  const y = target.y * config.tile + config.tile / 2;
-  return { x, y };
-}
-
-export function positionToTile(target: Target) {
-  const tileX = Math.floor(target.x / config.tile);
-  const tileY = Math.floor(target.y / config.tile);
-  return { x: tileX, y: tileY };
+  const relativePath = pathOfTiles.map((tile) => {
+    const [x, y] = tile;
+    return toRelativePosition({ x, y });
+  });
+  gameObject.target = relativePath;
 }
 
 function calculateDirection(distanceX: number, distanceY: number): Direction {

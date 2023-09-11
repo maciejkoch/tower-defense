@@ -1,11 +1,16 @@
-import { Position, Target } from './position.model';
 import { Size } from './size.model';
 import { Sprite } from '../sprite/sprite.model';
+import {
+  Direction,
+  RelativePosition,
+  TilePosition,
+} from '../position/position.model';
 
 export interface GameObject {
   sprite: Sprite;
-  position: Position;
-  target?: Target[];
+  position: RelativePosition;
+  direction: Direction;
+  target?: TilePosition[];
 
   size: Size;
   speed: number;
@@ -15,8 +20,7 @@ export interface GameObject {
 }
 
 export interface StaticObject {
-  tileX: number;
-  tileY: number;
+  position: TilePosition;
 
   draw: (ctx: CanvasRenderingContext2D) => void;
 }

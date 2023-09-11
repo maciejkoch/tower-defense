@@ -14,10 +14,6 @@ export function createEnemy(): GameObject {
 
   const sprite = createSprite({
     img: 'assets/enemy.png',
-    defaultPosition: {
-      x: 0,
-      y: 0,
-    },
     tileSize: {
       width: 48,
       height: 48,
@@ -34,6 +30,7 @@ export function createEnemy(): GameObject {
       x: 0,
       y: 0,
     },
+    direction: 0,
     size,
     speed: 30,
     update(secondsPassed: number) {
@@ -44,8 +41,11 @@ export function createEnemy(): GameObject {
         const movement = moveObject(this, nextTarget, secondsPassed);
 
         if (movement) {
-          this.position = movement;
-          this.sprite.update(secondsPassed, movement);
+          const { position, direction } = movement;
+          this.position = position;
+          this.direction = direction;
+
+          this.sprite.update(secondsPassed);
         } else {
           target.shift();
         }
@@ -54,7 +54,8 @@ export function createEnemy(): GameObject {
       }
     },
     draw(ctx: CanvasRenderingContext2D) {
-      this.sprite.draw(ctx);
+      const { position, direction } = this;
+      this.sprite.draw(ctx, position, direction);
 
       // draw target
       const { target = [] } = this;

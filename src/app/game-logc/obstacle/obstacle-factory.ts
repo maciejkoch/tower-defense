@@ -1,18 +1,15 @@
+import { TilePosition } from 'src/app/game-engine/position/position.model';
 import { config } from '../../config';
 import { StaticObject } from '../../game-engine/model/game-object.model';
 
-export function creatObstacle(tileX: number, tileY: number): StaticObject {
+export function creatObstacle(position: TilePosition): StaticObject {
   return {
-    tileX,
-    tileY,
+    position,
     draw(ctx) {
+      const { x, y } = position;
+
       ctx.fillStyle = 'black';
-      ctx.fillRect(
-        tileX * config.tile,
-        tileY * config.tile,
-        config.tile,
-        config.tile
-      );
+      ctx.fillRect(x * config.tile, y * config.tile, config.tile, config.tile);
     },
   };
 }
