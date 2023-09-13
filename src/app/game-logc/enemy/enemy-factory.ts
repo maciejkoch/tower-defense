@@ -1,8 +1,11 @@
-import { GameObject } from '../../game-engine/model/game-object.model';
-import { moveObject } from '../move/move-object';
+import { moveObject, calculateTarget } from '../move/move-object';
 import { createSprite } from '../../game-engine/sprite/sprite-factory';
+import { TilePosition } from '../../game-engine/position/position.model';
+import { toRelativePosition } from '../../game-engine/position/position';
+import { Enemy } from './enemy.model';
+import { RelativePosition } from '../../game-engine/position/position.model';
 
-export function createEnemy(): GameObject {
+export function createEnemy(tilePosition: TilePosition): Enemy {
   const size = {
     width: 20,
     height: 40,
@@ -26,10 +29,7 @@ export function createEnemy(): GameObject {
 
   return {
     sprite,
-    position: {
-      x: 0,
-      y: 0,
-    },
+    position: toRelativePosition(tilePosition),
     direction: 0,
     size,
     speed: 30,
@@ -58,16 +58,17 @@ export function createEnemy(): GameObject {
       this.sprite.draw(ctx, position, direction);
 
       // draw target
-      const { target = [] } = this;
+      // const { target = [] } = this;
 
-      target.forEach((item) => {
-        ctx.beginPath();
-        ctx.arc(item.x, item.y, 5, 0, 2 * Math.PI);
-        // random color
-        ctx.fillStyle = randomColor;
-        // ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
-        ctx.fill();
-      });
+      // target.forEach((item) => {
+      //   ctx.beginPath();
+      //   ctx.arc(item.x, item.y, 5, 0, 2 * Math.PI);
+      //   ctx.fillStyle = randomColor;
+      //   ctx.fill();
+      // });
+    },
+    setTarget(target: RelativePosition, obstacles: number[][]) {
+      this.target = calculateTarget(this, target, obstacles);
     },
   };
 }

@@ -1,16 +1,18 @@
 import { Injectable, inject } from '@angular/core';
+import { config } from '../config';
 import { BoardCommunicatorService } from '../game-comunication/board-communicator.service';
 import {
   GameObject,
   StaticObject,
 } from '../game-engine/model/game-object.model';
-import { creatObstacle } from './obstacle/obstacle-factory';
-import { config } from '../config';
-import { createTower } from './tower/tower-factory';
-import { Tower } from './tower/tower.model';
 import { toTilePosition } from '../game-engine/position/position';
 import { RelativePosition } from '../game-engine/position/position.model';
-import { setTarget } from './move/move-object';
+import { createEnemy } from './enemy/enemy-factory';
+import { Enemy } from './enemy/enemy.model';
+import { Hero } from './hero/hero.model';
+import { creatObstacle } from './obstacle/obstacle-factory';
+import { createTower } from './tower/tower-factory';
+import { Tower } from './tower/tower.model';
 
 @Injectable({
   providedIn: 'root',
@@ -20,8 +22,8 @@ export class GameManagerService {
 
   private mode: 'BUILD' | 'PLAY' = 'PLAY';
 
-  private hero?: GameObject;
-  private enemies: GameObject[] = [];
+  private hero?: Hero;
+  private enemies: Enemy[] = [];
   private obstacles: StaticObject[] = [];
   private towers: Tower[] = [];
 
@@ -37,6 +39,7 @@ export class GameManagerService {
       }
     });
 
+    // create obstacles - temporary solution
     const test = [
       [5, 5],
       [6, 6],
@@ -53,9 +56,20 @@ export class GameManagerService {
       type: 'ADD_STATIC_OBJECTS',
       payload: obstacles,
     });
+    // ---------------------
+
+    const addEnemy = () => {
+      const enemy = createEnemy({ x: 25, y: 10 });
+      enemy.setTarget({ x: 0, y: 0 }, this.buildGridWithObstacles());
+
+      this.addEnemy(enemy);
+    };
+
+    addEnemy();
+    setInterval(() => addEnemy(), 4000);
   }
 
-  addHero(hero: GameObject) {
+  addHero(hero: Hero) {
     this.hero = hero;
     this.boardCommunicatorService.dispatch({
       type: 'ADD_GAME_OBJECT',
@@ -85,10 +99,18 @@ export class GameManagerService {
     return grid;
   }
 
-  addEnemy(enemy: GameObject) {
-    this.enemies.push(enemy);
+  addEnemy(enemy: Enemy) {
+    this.enemies = [...this.enemies, enemy];
     this.boardCommunicatorService.dispatch({
       type: 'ADD_GAME_OBJECT',
+      payload: enemy,
+    });
+  }
+
+  removeEnemy(enemy: GameObject) {
+    this.enemies = this.enemies.filter((item) => item !== enemy);
+    this.boardCommunicatorService.dispatch({
+      type: 'REMOVE_GAME_OBJECT',
       payload: enemy,
     });
   }
@@ -109,23 +131,17 @@ export class GameManagerService {
       this.buildTower(tower);
     } else if (this.mode === 'PLAY') {
       if (this.hero) {
-        setTarget(this.hero, position, this.buildGridWithObstacles());
+        this.hero.setTarget(position, this.buildGridWithObstacles());
       }
     }
   }
 
   update(secondsPassed: number) {
-    this.enemies.forEach((enemy) => {
-      if (this.hero) {
-        setTarget(
-          enemy,
-          {
-            x: this.hero.position.x,
-            y: this.hero.position.y,
-          },
-          this.buildGridWithObstacles()
-        );
-      }
-    });
+    // this.enemies.forEach((enemy) => {
+    //   const { x, y } = toTilePosition(enemy.position);
+    //   if (x === 0 && y === 0) {
+    //     this.removeEnemy(enemy);
+    //   }
+    // });
   }
 }

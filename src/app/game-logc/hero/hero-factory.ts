@@ -1,6 +1,8 @@
 import { createSprite } from 'src/app/game-engine/sprite/sprite-factory';
 import { moveObject } from '../move/move-object';
 import { Hero } from './hero.model';
+import { RelativePosition } from '../../game-engine/position/position.model';
+import { calculateTarget } from '../move/move-object';
 
 export function createHero(): Hero {
   const position = {
@@ -65,6 +67,9 @@ export function createHero(): Hero {
         ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
         ctx.fill();
       });
+    },
+    setTarget(target: RelativePosition, obstacles: number[][]) {
+      this.target = calculateTarget(this, target, obstacles);
     },
   };
 }

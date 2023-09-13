@@ -14,7 +14,7 @@ export function createGame(
   let oldTimeStamp = 0;
   let movingSpeed = 10;
 
-  const gameObjects: GameObject[] = [];
+  let gameObjects: GameObject[] = [];
   const staticObjects: StaticObject[] = [];
 
   canvas.addEventListener('mousedown', (event) => {
@@ -65,6 +65,10 @@ export function createGame(
     gameObjects.push(gameObject);
   }
 
+  function removeGameObject(gameObject: GameObject) {
+    gameObjects = gameObjects.filter((item) => item !== gameObject);
+  }
+
   function addStaticObjects(items: StaticObject[]) {
     items.forEach((item) => staticObjects.push(item));
   }
@@ -77,6 +81,9 @@ export function createGame(
     switch (action.type) {
       case 'ADD_GAME_OBJECT':
         addGameObject(action.payload);
+        break;
+      case 'REMOVE_GAME_OBJECT':
+        removeGameObject(action.payload);
         break;
       case 'ADD_STATIC_OBJECTS':
         addStaticObjects(action.payload);

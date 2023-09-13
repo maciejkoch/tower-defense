@@ -8,6 +8,7 @@ import {
   toRelativePosition,
   toTilePosition,
 } from '../../game-engine/position/position';
+import { config } from 'src/app/config';
 
 export function moveObject(
   gameObject: GameObject,
@@ -27,7 +28,7 @@ export function moveObject(
   const distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
 
   // If the distance is smaller than the speed, we can't move any further
-  if (distance < 5) {
+  if (distance < 10) {
     return undefined;
   }
 
@@ -41,7 +42,7 @@ export function moveObject(
   };
 }
 
-export function setTarget(
+export function calculateTarget(
   gameObject: GameObject,
   target: RelativePosition,
   obstacles: number[][]
@@ -56,11 +57,10 @@ export function setTarget(
   var pathOfTiles = finder.findPath(start.x, start.y, goal.x, goal.y, grid);
   pathOfTiles.shift();
 
-  const relativePath = pathOfTiles.map((tile) => {
+  return pathOfTiles.map((tile) => {
     const [x, y] = tile;
     return toRelativePosition({ x, y });
   });
-  gameObject.target = relativePath;
 }
 
 function calculateDirection(distanceX: number, distanceY: number): Direction {
