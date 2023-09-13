@@ -1,7 +1,6 @@
 import { GameAction } from '../game-comunication/actions/actions';
-import { drawBoard } from './board/draw-board';
-import { config } from '../config';
 import { BoardEvent } from '../game-comunication/events/event.model';
+import { drawBoard } from './board/draw-board';
 import { GameObject, StaticObject } from './model/game-object.model';
 
 export function createGame(
@@ -41,6 +40,7 @@ export function createGame(
 
   function update(secondsPassed: number) {
     gameObjects.forEach((gameObject) => gameObject.update(secondsPassed));
+    staticObjects.forEach((staticObject) => staticObject.update(secondsPassed));
 
     emitEvent({
       type: 'UPDATE',
@@ -95,10 +95,4 @@ export function createGame(
     startGame,
     handleAction,
   };
-}
-
-function createGrid(width: number, height: number) {
-  return Array.from({ length: width / config.tile }, () =>
-    Array.from({ length: height / config.tile }, () => 0)
-  );
 }

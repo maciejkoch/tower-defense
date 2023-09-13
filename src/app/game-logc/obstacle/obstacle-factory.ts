@@ -11,5 +11,7 @@ export function creatObstacle(position: TilePosition): StaticObject {
       ctx.fillStyle = 'black';
       ctx.fillRect(x * config.tile, y * config.tile, config.tile, config.tile);
     },
+
+    update() {},
   };
 }

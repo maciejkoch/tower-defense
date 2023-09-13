@@ -12,3 +12,13 @@ export function toTilePosition(relativePosition: RelativePosition) {
   const tileY = Math.floor(relativePosition.y / config.tile);
   return { x: tileX, y: tileY };
 }
+
+export function calculateDistance(
+  position: RelativePosition,
+  target: RelativePosition
+) {
+  const x = position.x - target.x;
+  const y = position.y - target.y;
+
+  return Math.sqrt(x * x + y * y);
+}

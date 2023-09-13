@@ -1,14 +1,13 @@
-import { GameObject } from '../../game-engine/model/game-object.model';
 import * as PF from 'pathfinding';
-import {
-  Direction,
-  RelativePosition,
-} from '../../game-engine/position/position.model';
+import { GameObject } from '../../game-engine/model/game-object.model';
 import {
   toRelativePosition,
   toTilePosition,
 } from '../../game-engine/position/position';
-import { config } from 'src/app/config';
+import {
+  Direction,
+  RelativePosition,
+} from '../../game-engine/position/position.model';
 
 export function moveObject(
   gameObject: GameObject,

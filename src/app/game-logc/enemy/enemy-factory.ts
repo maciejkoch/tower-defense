@@ -1,19 +1,17 @@
-import { moveObject, calculateTarget } from '../move/move-object';
-import { createSprite } from '../../game-engine/sprite/sprite-factory';
-import { TilePosition } from '../../game-engine/position/position.model';
 import { toRelativePosition } from '../../game-engine/position/position';
+import {
+  RelativePosition,
+  TilePosition,
+} from '../../game-engine/position/position.model';
+import { createSprite } from '../../game-engine/sprite/sprite-factory';
+import { calculateTarget, moveObject } from '../move/move-object';
 import { Enemy } from './enemy.model';
-import { RelativePosition } from '../../game-engine/position/position.model';
 
 export function createEnemy(tilePosition: TilePosition): Enemy {
   const size = {
     width: 20,
     height: 40,
   };
-
-  const randomColor = `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${
-    Math.random() * 255
-  }, 0.2)`;
 
   const sprite = createSprite({
     img: 'assets/enemy.png',

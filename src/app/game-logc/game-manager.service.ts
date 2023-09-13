@@ -5,8 +5,14 @@ import {
   GameObject,
   StaticObject,
 } from '../game-engine/model/game-object.model';
-import { toTilePosition } from '../game-engine/position/position';
+import {
+  calculateDistance,
+  toRelativePosition,
+  toTilePosition,
+} from '../game-engine/position/position';
 import { RelativePosition } from '../game-engine/position/position.model';
+import { createBullet } from './bullet/bullet-factory';
+import { Bullet } from './bullet/bullet.model';
 import { createEnemy } from './enemy/enemy-factory';
 import { Enemy } from './enemy/enemy.model';
 import { Hero } from './hero/hero.model';
@@ -26,6 +32,7 @@ export class GameManagerService {
   private enemies: Enemy[] = [];
   private obstacles: StaticObject[] = [];
   private towers: Tower[] = [];
+  private bullets: Bullet[] = [];
 
   constructor() {
     this.boardCommunicatorService.event$.subscribe((event) => {
@@ -115,6 +122,22 @@ export class GameManagerService {
     });
   }
 
+  addBullet(bullet: Bullet) {
+    this.bullets.push(bullet);
+    this.boardCommunicatorService.dispatch({
+      type: 'ADD_GAME_OBJECT',
+      payload: bullet,
+    });
+  }
+
+  removeBullet(bullet: GameObject) {
+    this.bullets = this.bullets.filter((item) => item !== bullet);
+    this.boardCommunicatorService.dispatch({
+      type: 'REMOVE_GAME_OBJECT',
+      payload: bullet,
+    });
+  }
+
   buildTower(tower: Tower) {
     this.towers.push(tower);
     this.boardCommunicatorService.dispatch({
@@ -137,11 +160,46 @@ export class GameManagerService {
   }
 
   update(secondsPassed: number) {
-    // this.enemies.forEach((enemy) => {
-    //   const { x, y } = toTilePosition(enemy.position);
-    //   if (x === 0 && y === 0) {
-    //     this.removeEnemy(enemy);
-    //   }
-    // });
+    this.towers.forEach((tower) => {
+      let nearestEnemy: { enemy: Enemy; distance: number } | undefined;
+
+      this.enemies.forEach((enemy) => {
+        const enemyTilePosition = toTilePosition(enemy.position);
+
+        const distance = calculateDistance(enemyTilePosition, tower.position);
+        if (distance < tower.range) {
+          if (!nearestEnemy || distance < nearestEnemy.distance) {
+            nearestEnemy = {
+              enemy,
+              distance,
+            };
+          }
+        }
+      });
+
+      if (nearestEnemy && tower.ready) {
+        tower.shoot();
+
+        const towerRelativePosition = toRelativePosition(tower.position);
+        const bullet = createBullet(
+          towerRelativePosition,
+          nearestEnemy.enemy.position
+        );
+        this.addBullet(bullet);
+      }
+    });
+
+    this.bullets.forEach((bullet) => {
+      if (bullet.done) {
+        this.removeBullet(bullet);
+      }
+    });
+
+    this.enemies.forEach((enemy) => {
+      const enemyTilePosition = toTilePosition(enemy.position);
+      if (enemyTilePosition.x === 0 && enemyTilePosition.y === 0) {
+        this.removeEnemy(enemy);
+      }
+    });
   }
 }
