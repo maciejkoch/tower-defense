@@ -1,10 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { config } from '../config';
 import { BoardCommunicatorService } from '../game-comunication/board-communicator.service';
-import {
-  GameObject,
-  StaticObject,
-} from '../game-engine/model/game-object.model';
+import { GameObject } from '../game-engine/model/game-object.model';
 import {
   calculateDistance,
   toRelativePosition,
@@ -17,6 +14,7 @@ import { createEnemy } from './enemy/enemy-factory';
 import { Enemy } from './enemy/enemy.model';
 import { Hero } from './hero/hero.model';
 import { creatObstacle } from './obstacle/obstacle-factory';
+import { Obstacle } from './obstacle/obstacle.model';
 import { createTower } from './tower/tower-factory';
 import { Tower } from './tower/tower.model';
 
@@ -30,7 +28,7 @@ export class GameManagerService {
 
   private hero?: Hero;
   private enemies: Enemy[] = [];
-  private obstacles: StaticObject[] = [];
+  private obstacles: Obstacle[] = [];
   private towers: Tower[] = [];
   private bullets: Bullet[] = [];
 
@@ -60,7 +58,7 @@ export class GameManagerService {
     const obstacles = test.map(([x, y]) => creatObstacle({ x, y }));
     this.obstacles = obstacles;
     this.boardCommunicatorService.dispatch({
-      type: 'ADD_STATIC_OBJECTS',
+      type: 'ADD_GAME_OBJECT',
       payload: obstacles,
     });
     // ---------------------
@@ -141,8 +139,8 @@ export class GameManagerService {
   buildTower(tower: Tower) {
     this.towers.push(tower);
     this.boardCommunicatorService.dispatch({
-      type: 'ADD_STATIC_OBJECTS',
-      payload: [tower],
+      type: 'ADD_GAME_OBJECT',
+      payload: tower,
     });
   }
 

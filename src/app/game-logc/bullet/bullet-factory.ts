@@ -14,7 +14,6 @@ export function createBullet(
   return {
     position,
     aim,
-    size,
     speed: 300,
     done: false,
     update(secondsPassed: number) {

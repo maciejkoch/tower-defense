@@ -1,5 +1,4 @@
 import * as PF from 'pathfinding';
-import { GameObject } from '../../game-engine/model/game-object.model';
 import {
   toRelativePosition,
   toTilePosition,
@@ -8,9 +7,10 @@ import {
   Direction,
   RelativePosition,
 } from '../../game-engine/position/position.model';
+import { MovingObject } from './moving-object.model';
 
-export function moveObject(
-  gameObject: GameObject,
+export function moveObject<T extends MovingObject>(
+  gameObject: T,
   target: RelativePosition,
   secondsPassed: number
 ) {
@@ -41,8 +41,8 @@ export function moveObject(
   };
 }
 
-export function calculateTarget(
-  gameObject: GameObject,
+export function calculateTarget<T extends MovingObject>(
+  gameObject: T,
   target: RelativePosition,
   obstacles: number[][]
 ) {

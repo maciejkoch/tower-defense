@@ -1,8 +1,8 @@
 import { TilePosition } from 'src/app/game-engine/position/position.model';
 import { config } from '../../config';
-import { StaticObject } from '../../game-engine/model/game-object.model';
+import { Obstacle } from './obstacle.model';
 
-export function creatObstacle(position: TilePosition): StaticObject {
+export function creatObstacle(position: TilePosition): Obstacle {
   return {
     position,
     draw(ctx) {

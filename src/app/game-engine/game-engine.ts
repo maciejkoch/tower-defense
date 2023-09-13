@@ -1,7 +1,7 @@
 import { GameAction } from '../game-comunication/actions/actions';
 import { BoardEvent } from '../game-comunication/events/event.model';
 import { drawBoard } from './board/draw-board';
-import { GameObject, StaticObject } from './model/game-object.model';
+import { GameObject } from './model/game-object.model';
 
 export function createGame(
   canvas: HTMLCanvasElement,
@@ -11,10 +11,8 @@ export function createGame(
 
   let secondsPassed = 0;
   let oldTimeStamp = 0;
-  let movingSpeed = 10;
 
   let gameObjects: GameObject[] = [];
-  const staticObjects: StaticObject[] = [];
 
   canvas.addEventListener('mousedown', (event) => {
     let rect = canvas.getBoundingClientRect();
@@ -40,7 +38,6 @@ export function createGame(
 
   function update(secondsPassed: number) {
     gameObjects.forEach((gameObject) => gameObject.update(secondsPassed));
-    staticObjects.forEach((staticObject) => staticObject.update(secondsPassed));
 
     emitEvent({
       type: 'UPDATE',
@@ -52,7 +49,6 @@ export function createGame(
     if (!ctx) return;
 
     drawBoard(ctx, { width: canvas.width, height: canvas.height });
-    staticObjects.forEach((staticObject) => staticObject.draw(ctx));
     gameObjects.forEach((gameObject) => gameObject.draw(ctx));
   }
 
@@ -61,16 +57,12 @@ export function createGame(
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
 
-  function addGameObject(gameObject: GameObject) {
-    gameObjects.push(gameObject);
+  function addGameObjects(values: GameObject[]) {
+    gameObjects = [...gameObjects, ...values];
   }
 
   function removeGameObject(gameObject: GameObject) {
     gameObjects = gameObjects.filter((item) => item !== gameObject);
-  }
-
-  function addStaticObjects(items: StaticObject[]) {
-    items.forEach((item) => staticObjects.push(item));
   }
 
   function startGame() {
@@ -80,13 +72,13 @@ export function createGame(
   function handleAction(action: GameAction) {
     switch (action.type) {
       case 'ADD_GAME_OBJECT':
-        addGameObject(action.payload);
+        const objects = Array.isArray(action.payload)
+          ? action.payload
+          : [action.payload];
+        addGameObjects(objects);
         break;
       case 'REMOVE_GAME_OBJECT':
         removeGameObject(action.payload);
-        break;
-      case 'ADD_STATIC_OBJECTS':
-        addStaticObjects(action.payload);
         break;
     }
   }
