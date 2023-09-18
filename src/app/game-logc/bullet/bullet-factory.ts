@@ -36,5 +36,8 @@ export function createBullet(
       ctx.fill();
       ctx.closePath();
     },
+    getTilePosition() {
+      return this.position;
+    },
   };
 }

@@ -38,5 +38,9 @@ export function createTower(position: TilePosition): Tower {
         this.ready = false;
       }
     },
+
+    getTilePosition() {
+      return this.position;
+    },
   };
 }

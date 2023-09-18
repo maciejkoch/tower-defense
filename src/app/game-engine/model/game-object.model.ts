@@ -1,9 +1,7 @@
-export interface GameObject {
-  // position: RelativePosition;
-  // target?: TilePosition[];
+import { TilePosition } from '../position/position.model';
 
-  // size: Size;
-  // speed: number;
+export interface GameObject {
+  getTilePosition: () => TilePosition;
 
   update: (secondsPassed: number) => void;
   draw: (ctx: CanvasRenderingContext2D) => void;

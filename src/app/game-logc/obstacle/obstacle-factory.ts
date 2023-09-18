@@ -12,6 +12,10 @@ export function creatObstacle(position: TilePosition): Obstacle {
       ctx.fillRect(x * config.tile, y * config.tile, config.tile, config.tile);
     },
 
+    getTilePosition() {
+      return this.position;
+    },
+
     update() {},
   };
 }

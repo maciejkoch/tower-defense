@@ -1,8 +1,8 @@
+import { toTilePosition } from 'src/app/game-engine/position/position';
 import { createSprite } from 'src/app/game-engine/sprite/sprite-factory';
-import { moveObject } from '../move/move-object';
-import { Hero } from './hero.model';
 import { RelativePosition } from '../../game-engine/position/position.model';
-import { calculateTarget } from '../move/move-object';
+import { calculateTarget, moveObject } from '../move/move-object';
+import { Hero } from './hero.model';
 
 export function createHero(): Hero {
   const position = {
@@ -70,6 +70,10 @@ export function createHero(): Hero {
     },
     setTarget(target: RelativePosition, obstacles: number[][]) {
       this.target = calculateTarget(this, target, obstacles);
+    },
+
+    getTilePosition() {
+      return toTilePosition(this.position);
     },
   };
 }

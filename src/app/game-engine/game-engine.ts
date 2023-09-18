@@ -12,6 +12,9 @@ export function createGame(
   let secondsPassed = 0;
   let oldTimeStamp = 0;
 
+  let sortTimer = 0;
+  const sortSpeed = 1;
+
   let gameObjects: GameObject[] = [];
 
   canvas.addEventListener('mousedown', (event) => {
@@ -28,6 +31,7 @@ export function createGame(
   function gameLoop(timeStamp: number = 0) {
     secondsPassed = (timeStamp - oldTimeStamp) / 1000;
     oldTimeStamp = timeStamp;
+    sortTimer += secondsPassed;
 
     update(secondsPassed);
     clearCanvas();
@@ -37,11 +41,25 @@ export function createGame(
   }
 
   function update(secondsPassed: number) {
+    if (sortTimer > sortSpeed) {
+      sortTimer = 0;
+      sortGameObjects();
+      console.log('sort');
+    }
+
     gameObjects.forEach((gameObject) => gameObject.update(secondsPassed));
 
     emitEvent({
       type: 'UPDATE',
       payload: secondsPassed,
+    });
+  }
+
+  function sortGameObjects() {
+    gameObjects.sort((a, b) => {
+      if (a.getTilePosition().y > b.getTilePosition().y) return 1;
+      if (a.getTilePosition().y < b.getTilePosition().y) return -1;
+      return 0;
     });
   }
 
@@ -59,6 +77,7 @@ export function createGame(
 
   function addGameObjects(values: GameObject[]) {
     gameObjects = [...gameObjects, ...values];
+    sortGameObjects();
   }
 
   function removeGameObject(gameObject: GameObject) {

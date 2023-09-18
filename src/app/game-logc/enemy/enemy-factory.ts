@@ -1,4 +1,7 @@
-import { toRelativePosition } from '../../game-engine/position/position';
+import {
+  toRelativePosition,
+  toTilePosition,
+} from '../../game-engine/position/position';
 import {
   RelativePosition,
   TilePosition,
@@ -67,6 +70,9 @@ export function createEnemy(tilePosition: TilePosition): Enemy {
     },
     setTarget(target: RelativePosition, obstacles: number[][]) {
       this.target = calculateTarget(this, target, obstacles);
+    },
+    getTilePosition() {
+      return toTilePosition(this.position);
     },
   };
 }
