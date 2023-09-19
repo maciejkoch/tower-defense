@@ -2,10 +2,7 @@ import {
   toRelativePosition,
   toTilePosition,
 } from '../../game-engine/position/position';
-import {
-  RelativePosition,
-  TilePosition,
-} from '../../game-engine/position/position.model';
+import { TilePosition } from '../../game-engine/position/position.model';
 import { createSprite } from '../../game-engine/sprite/sprite-factory';
 import { calculateTarget, moveObject } from '../move/move-object';
 import { Enemy } from './enemy.model';
@@ -57,19 +54,10 @@ export function createEnemy(tilePosition: TilePosition): Enemy {
     draw(ctx: CanvasRenderingContext2D) {
       const { position, direction } = this;
       this.sprite.draw(ctx, position, direction);
-
-      // draw target
-      // const { target = [] } = this;
-
-      // target.forEach((item) => {
-      //   ctx.beginPath();
-      //   ctx.arc(item.x, item.y, 5, 0, 2 * Math.PI);
-      //   ctx.fillStyle = randomColor;
-      //   ctx.fill();
-      // });
     },
-    setTarget(target: RelativePosition, obstacles: number[][]) {
-      this.target = calculateTarget(this, target, obstacles);
+    setTarget(target: TilePosition, obstacles: number[][]) {
+      const realTarget = toRelativePosition(target);
+      this.target = calculateTarget(this, realTarget, obstacles);
     },
     getTilePosition() {
       return toTilePosition(this.position);
