@@ -1,0 +1,12 @@
+{
+  "hosting": {
+    "public": "dist/tower-defense",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
