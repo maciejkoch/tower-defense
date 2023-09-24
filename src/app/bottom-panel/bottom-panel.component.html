@@ -6,11 +6,7 @@
 } as context"
 >
   <div class="panel__towers">
-    <button
-      *ngIf="context.money"
-      (click)="enableBuildMode()"
-      [disabled]="context.money < 20"
-    >
+    <button (click)="enableBuildMode()" [disabled]="(context.money || 0) < 20">
       Build tower
     </button>
     <button (click)="enableNormalMode()" [disabled]="context.mode === 'NORMAL'">
@@ -18,6 +14,7 @@
     </button>
   </div>
   <div class="panel__stats">
+    <div>credits: {{ credits$ | async }}</div>
     <div>kills: {{ kills$ | async }}</div>
     <div>money: {{ money$ | async }}</div>
   </div>

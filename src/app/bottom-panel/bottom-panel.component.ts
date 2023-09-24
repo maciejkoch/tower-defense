@@ -9,6 +9,7 @@ import { GameStateService } from '../game-state/game-state.service';
 export class BottomPanelComponent {
   gameState = inject(GameStateService);
 
+  credits$ = this.gameState.credits$;
   kills$ = this.gameState.kills$;
   money$ = this.gameState.money$;
   mode$ = this.gameState.mode$;

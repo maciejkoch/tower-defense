@@ -52,11 +52,15 @@ export class GameManagerService {
 
   private onClick(position: RelativePosition) {
     const mode = this.gameState.selectModeSnapshot();
+    const money = this.gameState.selectMoneySnapshot();
+
     if (mode === 'BUILD') {
       const tilePosition = toTilePosition(position);
-      const tower = createTower(tilePosition, 50);
+      const tower = createTower(tilePosition, 20);
 
-      this.buildTower(tower);
+      if (money >= tower.price) {
+        this.buildTower(tower);
+      }
     }
   }
 
@@ -111,8 +115,12 @@ export class GameManagerService {
 
     enemies.forEach((enemy) => {
       const enemyTilePosition = toTilePosition(enemy.position);
-      if (enemyTilePosition.x === 0 && enemyTilePosition.y === 0) {
+      if (
+        enemyTilePosition.x === enemyGoal.x &&
+        enemyTilePosition.y === enemyGoal.y
+      ) {
         this.gameState.removeEnemy(enemy);
+        this.gameState.substractCredits();
       }
 
       if (enemy.currentHp <= 0) {

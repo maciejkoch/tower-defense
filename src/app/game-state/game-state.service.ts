@@ -14,6 +14,7 @@ export type GameMode = 'NORMAL' | 'BUILD';
 export class GameStateService {
   private boardCommunicatorService = inject(BoardCommunicatorService);
 
+  private _creadits$ = new BehaviorSubject(10);
   private _kills$ = new BehaviorSubject(0);
   private _money$ = new BehaviorSubject(100);
   private _mode$ = new BehaviorSubject<GameMode>('NORMAL');
@@ -35,8 +36,16 @@ export class GameStateService {
     return this._mode$.asObservable();
   }
 
+  get credits$() {
+    return this._creadits$.asObservable();
+  }
+
   get boardEvent$() {
     return this.boardCommunicatorService.event$;
+  }
+
+  selectMoneySnapshot() {
+    return this._money$.value;
   }
 
   selectModeSnapshot() {
@@ -69,6 +78,10 @@ export class GameStateService {
 
   substractMoney(amount: number) {
     this._money$.next(this._money$.value - amount);
+  }
+
+  substractCredits() {
+    this._creadits$.next(this._creadits$.value - 1);
   }
 
   setMode(mode: GameMode) {

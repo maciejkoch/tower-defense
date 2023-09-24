@@ -1,3 +1,4 @@
+import { config, enemyGoal } from '../config';
 import { GameAction } from '../game-comunication/actions/actions';
 import { BoardEvent } from '../game-comunication/events/event.model';
 import { drawBoard } from './board/draw-board';
@@ -44,7 +45,6 @@ export function createGame(
     if (sortTimer > sortSpeed) {
       sortTimer = 0;
       sortGameObjects();
-      console.log('sort');
     }
 
     gameObjects.forEach((gameObject) => gameObject.update(secondsPassed));
@@ -68,6 +68,14 @@ export function createGame(
 
     drawBoard(ctx, { width: canvas.width, height: canvas.height });
     gameObjects.forEach((gameObject) => gameObject.draw(ctx));
+
+    ctx.fillStyle = 'yellow';
+    ctx.fillRect(
+      enemyGoal.x * config.tile,
+      enemyGoal.y * config.tile,
+      config.tile,
+      config.tile
+    );
   }
 
   function clearCanvas() {
