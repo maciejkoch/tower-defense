@@ -2,7 +2,7 @@ import { TilePosition } from 'src/app/game-engine/position/position.model';
 import { config } from '../../config';
 import { Tower } from './tower.model';
 
-export function createTower(position: TilePosition): Tower {
+export function createTower(position: TilePosition, price: number): Tower {
   let totalSeconds = 0;
 
   return {
@@ -10,6 +10,7 @@ export function createTower(position: TilePosition): Tower {
     range: 10,
     speed: 1.5,
     damage: 10,
+    price,
 
     ready: true,
 

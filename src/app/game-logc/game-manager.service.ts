@@ -1,44 +1,26 @@
 import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
 import { config, enemyGoal, enemyStart } from '../config';
-import { BoardCommunicatorService } from '../game-comunication/board-communicator.service';
-import { GameObject } from '../game-engine/model/game-object.model';
 import {
   calculateDistance,
   toRelativePosition,
   toTilePosition,
 } from '../game-engine/position/position';
 import { RelativePosition } from '../game-engine/position/position.model';
+import { GameStateService } from '../game-state/game-state.service';
 import { createBullet } from './bullet/bullet-factory';
-import { Bullet } from './bullet/bullet.model';
 import { createEnemy } from './enemy/enemy-factory';
 import { Enemy } from './enemy/enemy.model';
-import { Hero } from './hero/hero.model';
-import { creatObstacle } from './obstacle/obstacle-factory';
-import { Obstacle } from './obstacle/obstacle.model';
 import { createTower } from './tower/tower-factory';
 import { Tower } from './tower/tower.model';
-
-export type GameMode = 'NORMAL' | 'BUILD';
 
 @Injectable({
   providedIn: 'root',
 })
 export class GameManagerService {
-  boardCommunicatorService = inject(BoardCommunicatorService);
-
-  kills$ = new BehaviorSubject(0);
-  money$ = new BehaviorSubject(100);
-  mode$ = new BehaviorSubject<GameMode>('NORMAL');
-
-  private hero?: Hero;
-  private enemies: Enemy[] = [];
-  private obstacles: Obstacle[] = [];
-  private towers: Tower[] = [];
-  private bullets: Bullet[] = [];
+  private gameState = inject(GameStateService);
 
   constructor() {
-    this.boardCommunicatorService.event$.subscribe((event) => {
+    this.gameState.boardEvent$.subscribe((event) => {
       switch (event.type) {
         case 'CLICK':
           this.onClick(event.payload);
@@ -49,114 +31,44 @@ export class GameManagerService {
       }
     });
 
-    // create obstacles - temporary solution
-    const obstacles = this.generateRandomObstacles();
-    this.addObstacles(obstacles);
-    // ---------------------
-
     const addEnemy = () => {
       const hp = 100;
       const enemy = createEnemy(enemyStart, hp);
       this.setEnemiesTarget([enemy]);
-      this.addEnemy(enemy);
+      this.gameState.addEnemy(enemy);
     };
 
     addEnemy();
-    setInterval(() => addEnemy(), 4000);
+    setInterval(() => addEnemy(), 4000); // move to update function
   }
 
-  addHero(hero: Hero) {
-    this.hero = hero;
-    this.boardCommunicatorService.dispatch({
-      type: 'ADD_GAME_OBJECT',
-      payload: hero,
-    });
+  private buildTower(tower: Tower) {
+    this.gameState.addTower(tower);
+    this.gameState.substractMoney(tower.price);
+
+    const enemies = this.gameState.selectEnemiesSnapshot();
+    this.setEnemiesTarget(enemies);
   }
 
-  enableBuildingMode() {
-    this.mode$.next('BUILD');
-  }
-
-  enableNormalMode() {
-    this.mode$.next('NORMAL');
-  }
-
-  private buildGridWithObstacles() {
-    const grid = Array.from({ length: config.height / config.tile }, () =>
-      Array.from({ length: config.width / config.tile }, () => 0)
-    );
-
-    const staticObjects = [...this.obstacles, ...this.towers];
-    staticObjects.forEach((obstacle) => {
-      const { x, y } = obstacle.position;
-      grid[y][x] = 1;
-    });
-
-    return grid;
-  }
-
-  addEnemy(enemy: Enemy) {
-    this.enemies = [...this.enemies, enemy];
-    this.boardCommunicatorService.dispatch({
-      type: 'ADD_GAME_OBJECT',
-      payload: enemy,
-    });
-  }
-
-  removeEnemy(enemy: GameObject) {
-    this.enemies = this.enemies.filter((item) => item !== enemy);
-    this.boardCommunicatorService.dispatch({
-      type: 'REMOVE_GAME_OBJECT',
-      payload: enemy,
-    });
-  }
-
-  addBullet(bullet: Bullet) {
-    this.bullets.push(bullet);
-    this.boardCommunicatorService.dispatch({
-      type: 'ADD_GAME_OBJECT',
-      payload: bullet,
-    });
-  }
-
-  removeBullet(bullet: GameObject) {
-    this.bullets = this.bullets.filter((item) => item !== bullet);
-    this.boardCommunicatorService.dispatch({
-      type: 'REMOVE_GAME_OBJECT',
-      payload: bullet,
-    });
-  }
-
-  buildTower(tower: Tower) {
-    this.towers.push(tower);
-    this.boardCommunicatorService.dispatch({
-      type: 'ADD_GAME_OBJECT',
-      payload: tower,
-    });
-
-    this.money$.next(this.money$.value - 20);
-
-    this.setEnemiesTarget();
-  }
-
-  onClick(position: RelativePosition) {
-    if (this.mode$.value === 'BUILD') {
+  private onClick(position: RelativePosition) {
+    const mode = this.gameState.selectModeSnapshot();
+    if (mode === 'BUILD') {
       const tilePosition = toTilePosition(position);
-      const tower = createTower(tilePosition);
+      const tower = createTower(tilePosition, 50);
 
       this.buildTower(tower);
-    } else if (this.mode$.value === 'NORMAL') {
-      // if (this.hero) {
-      //   this.hero.setTarget(position, this.buildGridWithObstacles());
-      // }
     }
   }
 
-  update(secondsPassed: number) {
-    this.towers.forEach((tower) => {
+  private update(secondsPassed: number) {
+    const towers = this.gameState.selectTowersSnapshot();
+    const bullets = this.gameState.selectBulletsSnapshot();
+    const enemies = this.gameState.selectEnemiesSnapshot();
+
+    towers.forEach((tower) => {
       let nearestEnemy: { enemy: Enemy; distance: number } | undefined;
 
-      this.enemies.forEach((enemy) => {
+      enemies.forEach((enemy) => {
         const enemyTilePosition = toTilePosition(enemy.position);
 
         const distance = calculateDistance(enemyTilePosition, tower.position);
@@ -179,62 +91,58 @@ export class GameManagerService {
           nearestEnemy.enemy.position,
           tower.damage
         );
-        this.addBullet(bullet);
+        this.gameState.addBullet(bullet);
       }
     });
 
-    this.bullets.forEach((bullet) => {
-      this.enemies.forEach((enemy) => {
+    bullets.forEach((bullet) => {
+      enemies.forEach((enemy) => {
         const distance = calculateDistance(bullet.position, enemy.position);
         if (distance < 10) {
           enemy.currentHp -= bullet.damage;
           bullet.done = true;
         }
       });
-    });
 
-    this.bullets.forEach((bullet) => {
       if (bullet.done) {
-        this.removeBullet(bullet);
+        this.gameState.removeBullet(bullet);
       }
     });
 
-    this.enemies.forEach((enemy) => {
+    enemies.forEach((enemy) => {
       const enemyTilePosition = toTilePosition(enemy.position);
       if (enemyTilePosition.x === 0 && enemyTilePosition.y === 0) {
-        this.removeEnemy(enemy);
+        this.gameState.removeEnemy(enemy);
       }
 
       if (enemy.currentHp <= 0) {
-        this.kills$.next(this.kills$.value + 1);
-        this.money$.next(this.money$.value + 10);
-        this.removeEnemy(enemy);
+        this.gameState.addKill();
+        this.gameState.addMoney(10); // enemy's reward
+        this.gameState.removeEnemy(enemy);
       }
     });
   }
 
-  private generateRandomObstacles() {
-    const obstaclePositions = Array.from({ length: 10 }, () => {
-      const x =
-        Math.floor(Math.random() * (config.width / config.tile - 2)) + 1;
-      const y =
-        Math.floor(Math.random() * (config.height / config.tile - 2)) + 1;
-      return [x, y];
-    });
-    return obstaclePositions.map(([x, y]) => creatObstacle({ x, y }));
-  }
-
-  private addObstacles(obstacles: Obstacle[]) {
-    this.obstacles = obstacles;
-    this.boardCommunicatorService.dispatch({
-      type: 'ADD_GAME_OBJECT',
-      payload: obstacles,
-    });
-  }
-
-  private setEnemiesTarget(enemies: Enemy[] = this.enemies) {
+  private setEnemiesTarget(enemies: Enemy[]) {
     enemies.forEach((enemy) => {
       enemy.setTarget(enemyGoal, this.buildGridWithObstacles());
     });
+  }
+
+  private buildGridWithObstacles() {
+    const obstacles = this.gameState.selectObstaclesSnapshot();
+    const towers = this.gameState.selectTowersSnapshot();
+
+    const grid = Array.from({ length: config.height / config.tile }, () =>
+      Array.from({ length: config.width / config.tile }, () => 0)
+    );
+
+    const staticObjects = [...obstacles, ...towers];
+    staticObjects.forEach((obstacle) => {
+      const { x, y } = obstacle.position;
+      grid[y][x] = 1;
+    });
+
+    return grid;
   }
 }

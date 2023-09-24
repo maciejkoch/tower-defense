@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { GameManagerService } from '../game-logc/game-manager.service';
+import { GameStateService } from '../game-state/game-state.service';
 
 @Component({
   selector: 'app-bottom-panel',
@@ -7,16 +7,17 @@ import { GameManagerService } from '../game-logc/game-manager.service';
   styleUrls: ['./bottom-panel.component.scss'],
 })
 export class BottomPanelComponent {
-  gameManagerService = inject(GameManagerService);
-  kills$ = this.gameManagerService.kills$;
-  money$ = this.gameManagerService.money$;
-  mode$ = this.gameManagerService.mode$;
+  gameState = inject(GameStateService);
+
+  kills$ = this.gameState.kills$;
+  money$ = this.gameState.money$;
+  mode$ = this.gameState.mode$;
 
   enableBuildMode() {
-    this.gameManagerService.enableBuildingMode();
+    this.gameState.setMode('BUILD');
   }
 
   enableNormalMode() {
-    this.gameManagerService.enableNormalMode();
+    this.gameState.setMode('NORMAL');
   }
 }

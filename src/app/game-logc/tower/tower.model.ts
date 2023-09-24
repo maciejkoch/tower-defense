@@ -6,6 +6,7 @@ export interface Tower extends GameObject {
   range: number;
   speed: number;
   damage: number;
+  price: number;
 
   ready: boolean;
 
