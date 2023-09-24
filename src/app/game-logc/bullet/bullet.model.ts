@@ -5,4 +5,6 @@ import { MovingObject } from '../move/moving-object.model';
 export interface Bullet extends GameObject, MovingObject {
   aim: RelativePosition;
   done: boolean;
+
+  damage: number;
 }

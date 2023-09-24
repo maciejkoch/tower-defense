@@ -8,7 +8,9 @@ export function createTower(position: TilePosition): Tower {
   return {
     position,
     range: 10,
-    speed: 1,
+    speed: 1.5,
+    damage: 10,
+
     ready: true,
 
     draw(ctx: CanvasRenderingContext2D) {

@@ -1,2 +1,24 @@
-<button (click)="enableBuildMode()">Build tower</button>
-<button (click)="enableNormalMode()">Cancel</button>
+<div
+  class="panel"
+  *ngIf="{
+    mode: mode$ | async,
+    money: money$ | async,
+} as context"
+>
+  <div class="panel__towers">
+    <button
+      *ngIf="context.money"
+      (click)="enableBuildMode()"
+      [disabled]="context.money < 20"
+    >
+      Build tower
+    </button>
+    <button (click)="enableNormalMode()" [disabled]="context.mode === 'NORMAL'">
+      Cancel
+    </button>
+  </div>
+  <div class="panel__stats">
+    <div>kills: {{ kills$ | async }}</div>
+    <div>money: {{ money$ | async }}</div>
+  </div>
+</div>

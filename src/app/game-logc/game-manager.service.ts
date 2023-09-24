@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 import { config, enemyGoal, enemyStart } from '../config';
 import { BoardCommunicatorService } from '../game-comunication/board-communicator.service';
 import { GameObject } from '../game-engine/model/game-object.model';
@@ -18,13 +19,17 @@ import { Obstacle } from './obstacle/obstacle.model';
 import { createTower } from './tower/tower-factory';
 import { Tower } from './tower/tower.model';
 
+export type GameMode = 'NORMAL' | 'BUILD';
+
 @Injectable({
   providedIn: 'root',
 })
 export class GameManagerService {
   boardCommunicatorService = inject(BoardCommunicatorService);
 
-  private mode: 'BUILD' | 'NORMAL' = 'NORMAL';
+  kills$ = new BehaviorSubject(0);
+  money$ = new BehaviorSubject(100);
+  mode$ = new BehaviorSubject<GameMode>('NORMAL');
 
   private hero?: Hero;
   private enemies: Enemy[] = [];
@@ -50,7 +55,8 @@ export class GameManagerService {
     // ---------------------
 
     const addEnemy = () => {
-      const enemy = createEnemy(enemyStart);
+      const hp = 100;
+      const enemy = createEnemy(enemyStart, hp);
       this.setEnemiesTarget([enemy]);
       this.addEnemy(enemy);
     };
@@ -68,11 +74,11 @@ export class GameManagerService {
   }
 
   enableBuildingMode() {
-    this.mode = 'BUILD';
+    this.mode$.next('BUILD');
   }
 
   enableNormalMode() {
-    this.mode = 'NORMAL';
+    this.mode$.next('NORMAL');
   }
 
   private buildGridWithObstacles() {
@@ -128,16 +134,18 @@ export class GameManagerService {
       payload: tower,
     });
 
+    this.money$.next(this.money$.value - 20);
+
     this.setEnemiesTarget();
   }
 
   onClick(position: RelativePosition) {
-    if (this.mode === 'BUILD') {
+    if (this.mode$.value === 'BUILD') {
       const tilePosition = toTilePosition(position);
       const tower = createTower(tilePosition);
 
       this.buildTower(tower);
-    } else if (this.mode === 'NORMAL') {
+    } else if (this.mode$.value === 'NORMAL') {
       // if (this.hero) {
       //   this.hero.setTarget(position, this.buildGridWithObstacles());
       // }
@@ -168,10 +176,21 @@ export class GameManagerService {
         const towerRelativePosition = toRelativePosition(tower.position);
         const bullet = createBullet(
           towerRelativePosition,
-          nearestEnemy.enemy.position
+          nearestEnemy.enemy.position,
+          tower.damage
         );
         this.addBullet(bullet);
       }
+    });
+
+    this.bullets.forEach((bullet) => {
+      this.enemies.forEach((enemy) => {
+        const distance = calculateDistance(bullet.position, enemy.position);
+        if (distance < 10) {
+          enemy.currentHp -= bullet.damage;
+          bullet.done = true;
+        }
+      });
     });
 
     this.bullets.forEach((bullet) => {
@@ -183,6 +202,12 @@ export class GameManagerService {
     this.enemies.forEach((enemy) => {
       const enemyTilePosition = toTilePosition(enemy.position);
       if (enemyTilePosition.x === 0 && enemyTilePosition.y === 0) {
+        this.removeEnemy(enemy);
+      }
+
+      if (enemy.currentHp <= 0) {
+        this.kills$.next(this.kills$.value + 1);
+        this.money$.next(this.money$.value + 10);
         this.removeEnemy(enemy);
       }
     });

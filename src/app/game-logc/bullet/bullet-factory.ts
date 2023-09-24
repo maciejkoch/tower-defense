@@ -4,14 +4,11 @@ import { Bullet } from './bullet.model';
 
 export function createBullet(
   position: RelativePosition,
-  aim: RelativePosition
+  aim: RelativePosition,
+  damage: number
 ): Bullet {
-  const size = {
-    width: 20,
-    height: 40,
-  };
-
   return {
+    damage,
     position,
     aim,
     speed: 300,

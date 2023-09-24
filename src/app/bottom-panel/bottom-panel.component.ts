@@ -8,6 +8,9 @@ import { GameManagerService } from '../game-logc/game-manager.service';
 })
 export class BottomPanelComponent {
   gameManagerService = inject(GameManagerService);
+  kills$ = this.gameManagerService.kills$;
+  money$ = this.gameManagerService.money$;
+  mode$ = this.gameManagerService.mode$;
 
   enableBuildMode() {
     this.gameManagerService.enableBuildingMode();

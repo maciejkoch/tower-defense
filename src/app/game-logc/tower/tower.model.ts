@@ -5,6 +5,7 @@ export interface Tower extends GameObject {
   position: TilePosition;
   range: number;
   speed: number;
+  damage: number;
 
   ready: boolean;
 

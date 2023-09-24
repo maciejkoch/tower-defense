@@ -12,5 +12,8 @@ export interface Enemy extends GameObject, MovingObject {
   sprite: Sprite;
   direction: Direction;
   size: Size;
+  hp: number;
+  currentHp: number;
+
   setTarget(target: RelativePosition, obstacles: number[][]): void;
 }
