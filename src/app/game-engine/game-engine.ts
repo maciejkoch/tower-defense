@@ -3,6 +3,7 @@ import { GameAction } from '../game-comunication/actions/actions';
 import { BoardEvent } from '../game-comunication/events/event.model';
 import { drawBoard } from './board/draw-board';
 import { GameObject } from './model/game-object.model';
+import { toTilePosition } from './position/position';
 
 export function createGame(
   canvas: HTMLCanvasElement,
@@ -23,9 +24,19 @@ export function createGame(
     let x = event.clientX - rect.left;
     let y = event.clientY - rect.top;
 
+    const tilePosition = toTilePosition({ x, y });
+
+    const gameObject = gameObjects.find((gameObject) => {
+      const { x, y } = gameObject.getTilePosition();
+      return x === tilePosition.x && y === tilePosition.y;
+    });
+
     emitEvent({
       type: 'CLICK',
-      payload: { x, y },
+      payload: {
+        tilePosition,
+        gameObject,
+      },
     });
   });
 

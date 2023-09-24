@@ -1,15 +1,17 @@
 import { Injectable, inject } from '@angular/core';
 import { config, enemyGoal, enemyStart } from '../config';
+import { GameObject } from '../game-engine/model/game-object.model';
 import {
   calculateDistance,
   toRelativePosition,
   toTilePosition,
 } from '../game-engine/position/position';
-import { RelativePosition } from '../game-engine/position/position.model';
+import { TilePosition } from '../game-engine/position/position.model';
 import { GameStateService } from '../game-state/game-state.service';
 import { createBullet } from './bullet/bullet-factory';
 import { createEnemy } from './enemy/enemy-factory';
 import { Enemy } from './enemy/enemy.model';
+import { calculateTarget } from './move/move-object';
 import { createTower } from './tower/tower-factory';
 import { Tower } from './tower/tower.model';
 
@@ -23,7 +25,8 @@ export class GameManagerService {
     this.gameState.boardEvent$.subscribe((event) => {
       switch (event.type) {
         case 'CLICK':
-          this.onClick(event.payload);
+          const { tilePosition, gameObject } = event.payload;
+          this.onClick(tilePosition, gameObject);
           break;
         case 'UPDATE':
           this.update(event.payload);
@@ -50,15 +53,18 @@ export class GameManagerService {
     this.setEnemiesTarget(enemies);
   }
 
-  private onClick(position: RelativePosition) {
+  private onClick(position: TilePosition, gameObject?: GameObject) {
     const mode = this.gameState.selectModeSnapshot();
     const money = this.gameState.selectMoneySnapshot();
 
     if (mode === 'BUILD') {
-      const tilePosition = toTilePosition(position);
-      const tower = createTower(tilePosition, 20);
+      const tower = createTower(position, 20);
 
-      if (money >= tower.price) {
+      const hasMoney = money >= tower.price;
+      const isPathValid = this.isBlockingPath(tower);
+      const isTileAvailable = !gameObject;
+
+      if (hasMoney && isPathValid && isTileAvailable) {
         this.buildTower(tower);
       }
     }
@@ -137,7 +143,7 @@ export class GameManagerService {
     });
   }
 
-  private buildGridWithObstacles() {
+  private buildGridWithObstacles(additionalTowers: Tower[] = []) {
     const obstacles = this.gameState.selectObstaclesSnapshot();
     const towers = this.gameState.selectTowersSnapshot();
 
@@ -145,12 +151,22 @@ export class GameManagerService {
       Array.from({ length: config.width / config.tile }, () => 0)
     );
 
-    const staticObjects = [...obstacles, ...towers];
+    const staticObjects = [...obstacles, ...towers, ...additionalTowers];
     staticObjects.forEach((obstacle) => {
       const { x, y } = obstacle.position;
       grid[y][x] = 1;
     });
 
     return grid;
+  }
+
+  private isBlockingPath(tower: Tower) {
+    const path = calculateTarget(
+      enemyStart,
+      enemyGoal,
+      this.buildGridWithObstacles([tower])
+    );
+
+    return path.length > 0;
   }
 }

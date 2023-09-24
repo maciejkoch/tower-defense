@@ -1,11 +1,9 @@
 import * as PF from 'pathfinding';
-import {
-  toRelativePosition,
-  toTilePosition,
-} from '../../game-engine/position/position';
+import { toRelativePosition } from '../../game-engine/position/position';
 import {
   Direction,
   RelativePosition,
+  TilePosition,
 } from '../../game-engine/position/position.model';
 import { MovingObject } from './moving-object.model';
 
@@ -41,19 +39,16 @@ export function moveObject<T extends MovingObject>(
   };
 }
 
-export function calculateTarget<T extends MovingObject>(
-  gameObject: T,
-  target: RelativePosition,
+export function calculateTarget(
+  start: TilePosition,
+  goal: TilePosition,
   obstacles: number[][]
 ) {
-  let start = toTilePosition(gameObject.position);
-  let goal = toTilePosition(target);
-
   const grid = new PF.Grid(obstacles);
   const finder = new PF.DijkstraFinder({
     diagonalMovement: PF.DiagonalMovement.OnlyWhenNoObstacles,
   });
-  var pathOfTiles = finder.findPath(start.x, start.y, goal.x, goal.y, grid);
+  const pathOfTiles = finder.findPath(start.x, start.y, goal.x, goal.y, grid);
   pathOfTiles.shift();
 
   return pathOfTiles.map((tile) => {

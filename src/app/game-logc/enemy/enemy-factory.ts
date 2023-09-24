@@ -71,8 +71,8 @@ export function createEnemy(tilePosition: TilePosition, hp: number): Enemy {
       ctx.fillRect(hpBarX, hpBarY, hpBarCurrentWidth, hpBarHeight);
     },
     setTarget(target: TilePosition, obstacles: number[][]) {
-      const realTarget = toRelativePosition(target);
-      this.target = calculateTarget(this, realTarget, obstacles);
+      const tilePosition = toTilePosition(this.position);
+      this.target = calculateTarget(tilePosition, target, obstacles);
     },
     getTilePosition() {
       return toTilePosition(this.position);
