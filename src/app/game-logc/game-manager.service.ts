@@ -34,15 +34,18 @@ export class GameManagerService {
       }
     });
 
-    const addEnemy = () => {
-      const hp = 100;
+    const addEnemy = (hp: number) => {
       const enemy = createEnemy(enemyStart, hp);
       this.setEnemiesTarget([enemy]);
       this.gameState.addEnemy(enemy);
     };
 
-    addEnemy();
-    setInterval(() => addEnemy(), 4000); // move to update function
+    let hp = 100;
+    addEnemy(hp);
+    setInterval(() => {
+      addEnemy(hp);
+      hp += 7;
+    }, 4000); // move to update function
   }
 
   private buildTower(tower: Tower) {

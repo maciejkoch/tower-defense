@@ -1,5 +1,5 @@
 export const config = {
-  width: 800,
+  width: 600,
   height: 400,
 
   tile: 20,

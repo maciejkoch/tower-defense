@@ -17,7 +17,7 @@ export class GameStateService {
   private _creadits$ = new BehaviorSubject(10);
   private _kills$ = new BehaviorSubject(0);
   private _money$ = new BehaviorSubject(100);
-  private _mode$ = new BehaviorSubject<GameMode>('NORMAL');
+  private _mode$ = new BehaviorSubject<GameMode>('BUILD');
 
   private _obstacles$ = new BehaviorSubject<Obstacle[]>([]);
   private _towers$ = new BehaviorSubject<Tower[]>([]);

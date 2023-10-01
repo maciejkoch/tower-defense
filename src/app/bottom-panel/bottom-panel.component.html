@@ -6,12 +6,12 @@
 } as context"
 >
   <div class="panel__towers">
-    <button (click)="enableBuildMode()" [disabled]="(context.money || 0) < 20">
+    <!-- <button (click)="enableBuildMode()" [disabled]="(context.money || 0) < 20">
       Build tower
     </button>
     <button (click)="enableNormalMode()" [disabled]="context.mode === 'NORMAL'">
       Cancel
-    </button>
+    </button> -->
   </div>
   <div class="panel__stats">
     <div>credits: {{ credits$ | async }}</div>
