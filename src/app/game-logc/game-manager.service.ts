@@ -11,7 +11,7 @@ import { GameStateService } from '../game-state/game-state.service';
 import { createBullet } from './bullet/bullet-factory';
 import { createEnemy } from './enemy/enemy-factory';
 import { Enemy } from './enemy/enemy.model';
-import { calculateTarget } from './move/move-object';
+import { calculateAngle, calculateTarget } from './move/move-object';
 import { createTower } from './tower/tower-factory';
 import { Tower } from './tower/tower.model';
 
@@ -20,6 +20,11 @@ import { Tower } from './tower/tower.model';
 })
 export class GameManagerService {
   private gameState = inject(GameStateService);
+
+  private enemyCreationTimer = 0;
+  private enemyCreationSpeed = 4;
+  private currentEnemyHp = 50;
+  private hpProgress = 4;
 
   constructor() {
     this.gameState.boardEvent$.subscribe((event) => {
@@ -33,19 +38,6 @@ export class GameManagerService {
           break;
       }
     });
-
-    const addEnemy = (hp: number) => {
-      const enemy = createEnemy(enemyStart, hp);
-      this.setEnemiesTarget([enemy]);
-      this.gameState.addEnemy(enemy);
-    };
-
-    let hp = 100;
-    addEnemy(hp);
-    setInterval(() => {
-      addEnemy(hp);
-      hp += 7;
-    }, 4000); // move to update function
   }
 
   private buildTower(tower: Tower) {
@@ -78,6 +70,18 @@ export class GameManagerService {
     const bullets = this.gameState.selectBulletsSnapshot();
     const enemies = this.gameState.selectEnemiesSnapshot();
 
+    // create enemy
+    this.enemyCreationTimer += secondsPassed;
+    if (this.enemyCreationTimer > this.enemyCreationSpeed) {
+      this.enemyCreationTimer = 0;
+
+      const enemy = createEnemy(enemyStart, this.currentEnemyHp);
+      this.setEnemiesTarget([enemy]);
+      this.gameState.addEnemy(enemy);
+
+      this.currentEnemyHp += this.hpProgress;
+    }
+
     towers.forEach((tower) => {
       let nearestEnemy: { enemy: Enemy; distance: number } | undefined;
 
@@ -85,17 +89,24 @@ export class GameManagerService {
         const enemyTilePosition = toTilePosition(enemy.position);
 
         const distance = calculateDistance(enemyTilePosition, tower.position);
-        if (distance < tower.range) {
-          if (!nearestEnemy || distance < nearestEnemy.distance) {
-            nearestEnemy = {
-              enemy,
-              distance,
-            };
-          }
+        if (!nearestEnemy || distance < nearestEnemy.distance) {
+          nearestEnemy = {
+            enemy,
+            distance,
+          };
         }
       });
 
-      if (nearestEnemy && tower.ready) {
+      // calculate angle
+      if (nearestEnemy) {
+        const { enemy } = nearestEnemy;
+        const towerPosition = toRelativePosition(tower.position);
+        const angle = calculateAngle(enemy.position, towerPosition);
+
+        tower.angle = angle;
+      }
+
+      if (nearestEnemy && tower.ready && nearestEnemy.distance < tower.range) {
         tower.shoot();
 
         const towerRelativePosition = toRelativePosition(tower.position);

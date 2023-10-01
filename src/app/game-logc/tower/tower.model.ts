@@ -8,6 +8,9 @@ export interface Tower extends GameObject {
   damage: number;
   price: number;
 
+  currentAngle: number;
+  angle: number;
+
   ready: boolean;
 
   shoot(): void;

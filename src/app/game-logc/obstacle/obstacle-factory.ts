@@ -8,7 +8,7 @@ export function creatObstacle(position: TilePosition): Obstacle {
     draw(ctx) {
       const { x, y } = position;
 
-      ctx.fillStyle = 'black';
+      ctx.fillStyle = 'grey';
       ctx.fillRect(x * config.tile, y * config.tile, config.tile, config.tile);
     },
 

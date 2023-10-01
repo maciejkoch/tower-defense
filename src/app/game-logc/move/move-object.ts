@@ -39,6 +39,16 @@ export function moveObject<T extends MovingObject>(
   };
 }
 
+export function calculateAngle(
+  position: RelativePosition,
+  target: RelativePosition
+) {
+  const distanceX = target.x - position.x;
+  const distanceY = target.y - position.y;
+
+  return Math.atan2(distanceY, distanceX);
+}
+
 export function calculateTarget(
   start: TilePosition,
   goal: TilePosition,
