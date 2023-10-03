@@ -33,6 +33,9 @@ export class GameManagerService {
           const { tilePosition, gameObject } = event.payload;
           this.onClick(tilePosition, gameObject);
           break;
+        case 'CURSOR':
+          this.onCursor(event.payload);
+          break;
         case 'UPDATE':
           this.update(event.payload);
           break;
@@ -47,6 +50,8 @@ export class GameManagerService {
     const enemies = this.gameState.selectEnemiesSnapshot();
     this.setEnemiesTarget(enemies);
   }
+
+  private onCursor(position: TilePosition) {}
 
   private onClick(position: TilePosition, gameObject?: GameObject) {
     const mode = this.gameState.selectModeSnapshot();
@@ -102,7 +107,6 @@ export class GameManagerService {
         const { enemy } = nearestEnemy;
         const towerPosition = toRelativePosition(tower.position);
         const angle = calculateAngle(enemy.position, towerPosition);
-
         tower.angle = angle;
       }
 

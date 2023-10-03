@@ -5,11 +5,23 @@ import { Obstacle } from './obstacle.model';
 export function creatObstacle(position: TilePosition): Obstacle {
   return {
     position,
-    draw(ctx) {
-      const { x, y } = position;
+    createDraw() {
+      return [
+        {
+          zIndex: 1,
+          draw: (ctx: CanvasRenderingContext2D) => {
+            const { x, y } = position;
 
-      ctx.fillStyle = 'grey';
-      ctx.fillRect(x * config.tile, y * config.tile, config.tile, config.tile);
+            ctx.fillStyle = 'grey';
+            ctx.fillRect(
+              x * config.tile,
+              y * config.tile,
+              config.tile,
+              config.tile
+            );
+          },
+        },
+      ];
     },
 
     getTilePosition() {

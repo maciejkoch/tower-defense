@@ -53,32 +53,45 @@ export function createEnemy(tilePosition: TilePosition, hp: number): Enemy {
         this.sprite.reset();
       }
     },
-    draw(ctx: CanvasRenderingContext2D) {
-      const { position, direction } = this;
-      this.sprite.draw(ctx, position, direction);
+    createDraw() {
+      return [
+        {
+          zIndex: 1,
+          draw: (ctx: CanvasRenderingContext2D) => {
+            const { position, direction } = this;
+            this.sprite.draw(ctx, position, direction);
+          },
+        },
+        {
+          zIndex: 3,
+          draw: (ctx: CanvasRenderingContext2D) => {
+            const { position } = this;
 
-      // hp bar
-      const { x, y } = position;
-      const hpBarWidth = 10;
-      const hpBarHeight = 3;
-      const hpBarX = x - hpBarWidth / 2;
-      const hpBarY = y + 3;
-      const hpBarCurrentWidth = (hpBarWidth * this.currentHp) / this.hp;
+            // hp bar
+            const { x, y } = position;
+            const hpBarWidth = 10;
+            const hpBarHeight = 3;
+            const hpBarX = x - hpBarWidth / 2;
+            const hpBarY = y + 3;
+            const hpBarCurrentWidth = (hpBarWidth * this.currentHp) / this.hp;
 
-      ctx.fillStyle = 'red';
-      ctx.fillRect(hpBarX, hpBarY, hpBarWidth, hpBarHeight);
-      ctx.fillStyle = 'green';
-      ctx.fillRect(hpBarX, hpBarY, hpBarCurrentWidth, hpBarHeight);
+            ctx.fillStyle = 'red';
+            ctx.fillRect(hpBarX, hpBarY, hpBarWidth, hpBarHeight);
+            ctx.fillStyle = 'green';
+            ctx.fillRect(hpBarX, hpBarY, hpBarCurrentWidth, hpBarHeight);
 
-      // draw hp below bar
-      ctx.fillStyle = 'black';
-      ctx.font = '10px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText(
-        `${this.currentHp}/${this.hp}`,
-        hpBarX + hpBarWidth / 2,
-        hpBarY + hpBarHeight + 10
-      );
+            // draw hp below bar
+            ctx.fillStyle = 'black';
+            ctx.font = '10px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(
+              `${this.currentHp}/${this.hp}`,
+              hpBarX + hpBarWidth / 2,
+              hpBarY + hpBarHeight + 10
+            );
+          },
+        },
+      ];
     },
     setTarget(target: TilePosition, obstacles: number[][]) {
       const tilePosition = toTilePosition(this.position);

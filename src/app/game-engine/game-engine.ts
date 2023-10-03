@@ -5,11 +5,21 @@ import { drawBoard } from './board/draw-board';
 import { GameObject } from './model/game-object.model';
 import { toTilePosition } from './position/position';
 
+export interface GameDrawObject {
+  gameObject: GameObject;
+  drawObject: {
+    zIndex: number;
+    draw: (ctx: CanvasRenderingContext2D) => void;
+  };
+}
+
 export function createGame(
   canvas: HTMLCanvasElement,
   emitEvent: (event: BoardEvent) => void
 ) {
   const ctx = canvas.getContext('2d');
+
+  let fps = 0;
 
   let secondsPassed = 0;
   let oldTimeStamp = 0;
@@ -18,6 +28,7 @@ export function createGame(
   const sortSpeed = 1;
 
   let gameObjects: GameObject[] = [];
+  let drawObjects: GameDrawObject[] = [];
 
   canvas.addEventListener('mousedown', (event) => {
     let rect = canvas.getBoundingClientRect();
@@ -40,9 +51,24 @@ export function createGame(
     });
   });
 
+  canvas.addEventListener('mousemove', (event) => {
+    let rect = canvas.getBoundingClientRect();
+    let x = event.clientX - rect.left;
+    let y = event.clientY - rect.top;
+
+    const tilePosition = toTilePosition({ x, y });
+
+    emitEvent({
+      type: 'CURSOR',
+      payload: tilePosition,
+    });
+  });
+
   function gameLoop(timeStamp: number = 0) {
     secondsPassed = (timeStamp - oldTimeStamp) / 1000;
     oldTimeStamp = timeStamp;
+    fps = Math.round(1 / secondsPassed);
+
     sortTimer += secondsPassed;
 
     update(secondsPassed);
@@ -55,7 +81,7 @@ export function createGame(
   function update(secondsPassed: number) {
     if (sortTimer > sortSpeed) {
       sortTimer = 0;
-      sortGameObjects();
+      sortDrawObjects(drawObjects);
     }
 
     gameObjects.forEach((gameObject) => gameObject.update(secondsPassed));
@@ -66,20 +92,42 @@ export function createGame(
     });
   }
 
-  function sortGameObjects() {
-    gameObjects.sort((a, b) => {
-      if (a.getTilePosition().y > b.getTilePosition().y) return 1;
-      if (a.getTilePosition().y < b.getTilePosition().y) return -1;
-      return 0;
+  function sortDrawObjects(items: GameDrawObject[]) {
+    items.sort((a, b) => {
+      const { gameObject: objectA, drawObject: drawA } = a;
+      const { gameObject: objectB, drawObject: drawB } = b;
+
+      if (drawA.zIndex > drawB.zIndex) return 1;
+      if (drawA.zIndex < drawB.zIndex) return -1;
+      else {
+        if (objectA.getTilePosition().y > objectB.getTilePosition().y) return 1;
+        if (objectA.getTilePosition().y < objectB.getTilePosition().y)
+          return -1;
+        return 0;
+      }
     });
+  }
+
+  function createDrawObjects(items: GameObject[]) {
+    const newItems = items.reduce((acc, gameObject) => {
+      return [
+        ...acc,
+        ...gameObject
+          .createDraw()
+          .map((drawObject) => ({ gameObject, drawObject })),
+      ];
+    }, [] as GameDrawObject[]);
+
+    sortDrawObjects(newItems);
+    return newItems;
   }
 
   function draw() {
     if (!ctx) return;
 
     drawBoard(ctx, { width: canvas.width, height: canvas.height });
-    gameObjects.forEach((gameObject) => gameObject.draw(ctx));
 
+    // draw goal
     ctx.fillStyle = 'yellow';
     ctx.fillRect(
       enemyGoal.x * config.tile,
@@ -87,6 +135,8 @@ export function createGame(
       config.tile,
       config.tile
     );
+
+    drawObjects.forEach(({ drawObject }) => drawObject.draw(ctx));
   }
 
   function clearCanvas() {
@@ -96,11 +146,12 @@ export function createGame(
 
   function addGameObjects(values: GameObject[]) {
     gameObjects = [...gameObjects, ...values];
-    sortGameObjects();
+    drawObjects = createDrawObjects(gameObjects);
   }
 
   function removeGameObject(gameObject: GameObject) {
     gameObjects = gameObjects.filter((item) => item !== gameObject);
+    drawObjects = createDrawObjects(gameObjects);
   }
 
   function startGame() {

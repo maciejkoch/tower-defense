@@ -24,14 +24,21 @@ export function createBullet(
         this.done = true;
       }
     },
-    draw(ctx: CanvasRenderingContext2D) {
-      const { position } = this;
+    createDraw() {
+      return [
+        {
+          zIndex: 1,
+          draw: (ctx: CanvasRenderingContext2D) => {
+            const { position } = this;
 
-      ctx.beginPath();
-      ctx.arc(position.x, position.y, 3, 0, 2 * Math.PI);
-      ctx.fillStyle = 'black';
-      ctx.fill();
-      ctx.closePath();
+            ctx.beginPath();
+            ctx.arc(position.x, position.y, 3, 0, 2 * Math.PI);
+            ctx.fillStyle = 'black';
+            ctx.fill();
+            ctx.closePath();
+          },
+        },
+      ];
     },
     getTilePosition() {
       return this.position;

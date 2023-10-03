@@ -49,6 +49,22 @@ export function calculateAngle(
   return Math.atan2(distanceY, distanceX);
 }
 
+export function calculateRotationDirection(
+  currentAngle: number,
+  desiredAngle: number
+): 'left' | 'right' {
+  const diff = desiredAngle - currentAngle;
+  if (diff > Math.PI) {
+    return 'left';
+  } else if (diff < -Math.PI) {
+    return 'right';
+  } else if (diff > 0) {
+    return 'right';
+  } else {
+    return 'left';
+  }
+}
+
 export function calculateTarget(
   start: TilePosition,
   goal: TilePosition,

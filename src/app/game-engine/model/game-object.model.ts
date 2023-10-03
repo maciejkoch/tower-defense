@@ -4,5 +4,8 @@ export interface GameObject {
   getTilePosition: () => TilePosition;
 
   update: (secondsPassed: number) => void;
-  draw: (ctx: CanvasRenderingContext2D) => void;
+  createDraw: () => {
+    zIndex: number;
+    draw: (ctx: CanvasRenderingContext2D) => void;
+  }[];
 }

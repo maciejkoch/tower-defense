@@ -1,9 +1,11 @@
 import { TilePosition } from 'src/app/game-engine/position/position.model';
 import { config } from '../../config';
+import { calculateRotationDirection } from '../move/move-object';
 import { Tower } from './tower.model';
 
 export function createTower(position: TilePosition, price: number): Tower {
   let totalSeconds = 0;
+  const rotateSpeed = 5;
 
   const drawGun = (ctx: CanvasRenderingContext2D, tower: Tower) => {
     const { tile } = config;
@@ -13,7 +15,7 @@ export function createTower(position: TilePosition, price: number): Tower {
     ctx.translate(x * tile + tile / 2, y * tile + tile / 2);
     ctx.rotate(tower.currentAngle + (Math.PI * 90) / 180);
     ctx.fillStyle = 'black';
-    ctx.fillRect(-2.5, 0, 5, 11);
+    ctx.fillRect(-2.5, 0, 5, 16);
     ctx.restore();
   };
 
@@ -48,37 +50,61 @@ export function createTower(position: TilePosition, price: number): Tower {
     currentAngle: 0,
     angle: 0,
 
-    draw(ctx: CanvasRenderingContext2D) {
+    createDraw() {
       const { tile } = config;
       const { x, y } = position;
 
-      drawRange(ctx, this);
-
-      ctx.fillStyle = 'red';
-      ctx.fillRect(x * tile, y * tile, tile, tile);
-
-      drawGun(ctx, this);
+      return [
+        {
+          zIndex: 0,
+          draw: (ctx: CanvasRenderingContext2D) => {
+            drawRange(ctx, this);
+          },
+        },
+        {
+          zIndex: 1,
+          draw: (ctx: CanvasRenderingContext2D) => {
+            ctx.fillStyle = 'red';
+            ctx.fillRect(x * tile, y * tile, tile, tile);
+          },
+        },
+        {
+          zIndex: 2,
+          draw: (ctx: CanvasRenderingContext2D) => {
+            drawGun(ctx, this);
+          },
+        },
+      ];
     },
 
     update(secondsPassed: number) {
-      const { speed } = this;
-
-      const realSpeed = speed * secondsPassed;
-      const angleDifference = Math.abs(this.angle - this.currentAngle);
-      if (angleDifference < realSpeed) {
+      // gun rotation
+      const realRotateSpeed = rotateSpeed * secondsPassed;
+      const gunRotation = calculateRotationDirection(
+        this.currentAngle,
+        this.angle
+      );
+      if (Math.abs(this.angle - this.currentAngle) < 0.2) {
         this.currentAngle = this.angle;
       } else {
-        if (this.angle < this.currentAngle) {
-          this.currentAngle -= realSpeed;
+        if (gunRotation === 'left') {
+          this.currentAngle -= realRotateSpeed;
         } else {
-          this.currentAngle += realSpeed;
+          this.currentAngle += realRotateSpeed;
+        }
+
+        if (this.currentAngle > Math.PI) {
+          this.currentAngle -= Math.PI * 2;
+        } else if (this.currentAngle < -Math.PI) {
+          this.currentAngle += Math.PI * 2;
         }
       }
 
+      // shoot cooldown
       if (!this.ready) {
         totalSeconds += secondsPassed;
 
-        if (totalSeconds > speed) {
+        if (totalSeconds > this.speed) {
           totalSeconds = 0;
           this.ready = true;
         }
