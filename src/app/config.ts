@@ -1,16 +1,16 @@
 export const config = {
-  width: 600,
-  height: 400,
+  width: 1200,
+  height: 800,
 
-  tile: 20,
+  tile: 40,
 };
 
 export const enemyStart = {
   x: config.width / config.tile - 1,
-  y: config.height / 2 / config.tile - 1,
+  y: config.height / config.tile - 1,
 };
 
 export const enemyGoal = {
   x: 0,
-  y: config.height / 2 / config.tile - 1,
+  y: 0,
 };

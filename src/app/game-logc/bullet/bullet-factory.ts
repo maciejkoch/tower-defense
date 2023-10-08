@@ -11,7 +11,7 @@ export function createBullet(
     damage,
     position,
     aim,
-    speed: 300,
+    speed: 600,
     done: false,
     update(secondsPassed: number) {
       const { aim } = this;

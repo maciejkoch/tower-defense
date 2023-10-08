@@ -15,7 +15,7 @@ export function createTower(position: TilePosition, price: number): Tower {
     ctx.translate(x * tile + tile / 2, y * tile + tile / 2);
     ctx.rotate(tower.currentAngle + (Math.PI * 90) / 180);
     ctx.fillStyle = 'black';
-    ctx.fillRect(-2.5, 0, 5, 16);
+    ctx.fillRect(-5, 0, 10, 32);
     ctx.restore();
   };
 

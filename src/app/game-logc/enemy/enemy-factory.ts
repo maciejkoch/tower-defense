@@ -9,8 +9,8 @@ import { Enemy } from './enemy.model';
 
 export function createEnemy(tilePosition: TilePosition, hp: number): Enemy {
   const size = {
-    width: 20,
-    height: 40,
+    width: 40,
+    height: 90,
   };
 
   const sprite = createSprite({
@@ -30,7 +30,7 @@ export function createEnemy(tilePosition: TilePosition, hp: number): Enemy {
     position: toRelativePosition(tilePosition),
     direction: 0,
     size,
-    speed: 30,
+    speed: 60,
     hp,
     currentHp: hp,
     update(secondsPassed: number) {
@@ -69,8 +69,8 @@ export function createEnemy(tilePosition: TilePosition, hp: number): Enemy {
 
             // hp bar
             const { x, y } = position;
-            const hpBarWidth = 10;
-            const hpBarHeight = 3;
+            const hpBarWidth = 20;
+            const hpBarHeight = 6;
             const hpBarX = x - hpBarWidth / 2;
             const hpBarY = y + 3;
             const hpBarCurrentWidth = (hpBarWidth * this.currentHp) / this.hp;
@@ -82,12 +82,12 @@ export function createEnemy(tilePosition: TilePosition, hp: number): Enemy {
 
             // draw hp below bar
             ctx.fillStyle = 'black';
-            ctx.font = '10px Arial';
+            ctx.font = '14px Arial';
             ctx.textAlign = 'center';
             ctx.fillText(
               `${this.currentHp}/${this.hp}`,
               hpBarX + hpBarWidth / 2,
-              hpBarY + hpBarHeight + 10
+              hpBarY + hpBarHeight + 14
             );
           },
         },

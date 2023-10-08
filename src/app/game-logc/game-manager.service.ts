@@ -149,7 +149,7 @@ export class GameManagerService {
 
       if (enemy.currentHp <= 0) {
         this.gameState.addKill();
-        this.gameState.addMoney(10); // enemy's reward
+        this.gameState.addMoney(5); // enemy's reward
         this.gameState.removeEnemy(enemy);
       }
     });

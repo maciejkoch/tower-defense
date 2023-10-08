@@ -31,9 +31,12 @@ export function createGame(
   let drawObjects: GameDrawObject[] = [];
 
   canvas.addEventListener('mousedown', (event) => {
-    let rect = canvas.getBoundingClientRect();
-    let x = event.clientX - rect.left;
-    let y = event.clientY - rect.top;
+    const rect = canvas.getBoundingClientRect();
+    const ratioX = canvas.width / rect.width;
+    const ratioY = canvas.height / rect.height;
+
+    const x = (event.clientX - rect.left) * ratioX;
+    const y = (event.clientY - rect.top) * ratioY;
 
     const tilePosition = toTilePosition({ x, y });
 
@@ -52,9 +55,12 @@ export function createGame(
   });
 
   canvas.addEventListener('mousemove', (event) => {
-    let rect = canvas.getBoundingClientRect();
-    let x = event.clientX - rect.left;
-    let y = event.clientY - rect.top;
+    const rect = canvas.getBoundingClientRect();
+    const ratioX = canvas.width / rect.width;
+    const ratioY = canvas.height / rect.height;
+
+    const x = (event.clientX - rect.left) * ratioX;
+    const y = (event.clientY - rect.top) * ratioY;
 
     const tilePosition = toTilePosition({ x, y });
 
