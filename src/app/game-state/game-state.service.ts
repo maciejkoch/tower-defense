@@ -44,6 +44,10 @@ export class GameStateService {
     return this.boardCommunicatorService.event$;
   }
 
+  startGame() {
+    this.boardCommunicatorService.startGame();
+  }
+
   selectMoneySnapshot() {
     return this._money$.value;
   }

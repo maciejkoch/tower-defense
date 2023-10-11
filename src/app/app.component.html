@@ -1,4 +1,6 @@
 <div class="game">
+  <button (click)="start()">Start</button>
+  <textarea [(ngModel)]="text"></textarea>
   <app-board class="game__board"></app-board>
   <app-bottom-panel class="game__bottom-panel"></app-bottom-panel>
 </div>

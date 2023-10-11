@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
-import { BoardCommunicatorService } from '../game-comunication/board-communicator.service';
 import { config } from '../config';
+import { BoardCommunicatorService } from '../game-comunication/board-communicator.service';
 import { createGame } from '../game-engine/game-engine';
 
 @Component({
@@ -13,15 +13,17 @@ export class BoardComponent {
 
   config = config;
 
-  ngAfterViewInit() {
-    const canvas = document.getElementById('board') as HTMLCanvasElement;
-    const { startGame, handleAction } = createGame(canvas, (event) =>
-      this.boardCommunicatorService.emitEvent(event)
-    );
-    startGame();
+  constructor() {
+    this.boardCommunicatorService.start$.subscribe(() => {
+      const canvas = document.getElementById('board') as HTMLCanvasElement;
+      const { startGame, handleAction } = createGame(canvas, (event) =>
+        this.boardCommunicatorService.emitEvent(event)
+      );
+      startGame();
 
-    this.boardCommunicatorService.action$.subscribe((action) => {
-      handleAction(action);
+      this.boardCommunicatorService.action$.subscribe((action) => {
+        handleAction(action);
+      });
     });
   }
 }

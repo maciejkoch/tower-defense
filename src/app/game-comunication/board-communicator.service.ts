@@ -10,6 +10,8 @@ export class BoardCommunicatorService {
   private _action$ = new ReplaySubject<GameAction>();
   private _event$ = new ReplaySubject<BoardEvent>();
 
+  private _start$ = new ReplaySubject<void>();
+
   get action$() {
     return this._action$.asObservable();
   }
@@ -18,11 +20,19 @@ export class BoardCommunicatorService {
     return this._event$.asObservable();
   }
 
+  get start$() {
+    return this._start$.asObservable();
+  }
+
   dispatch(action: GameAction) {
     this._action$.next(action);
   }
 
   emitEvent(event: BoardEvent) {
     this._event$.next(event);
+  }
+
+  startGame() {
+    this._start$.next();
   }
 }

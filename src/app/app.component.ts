@@ -12,13 +12,34 @@ import { GameStateService } from './game-state/game-state.service';
 })
 export class AppComponent {
   title = 'tower-defense';
+  text = `
+  
+      return (state) => {
+        const { money, towers, enemies, obstacles, goal, start } = state;
+        const occupiedTiles = [...towers, ...enemies, ...obstacles];
+    
+        const ys = occupiedTiles.map((tile) => tile.y);
+        let y = 0;
+        while (ys.includes(y)) {
+          y++;
+        }
+    
+        const x = 1;
+        return { x, y };
+      }
+    `;
 
-  gameState = inject(GameStateService);
-  gameManeger = inject(GameManagerService); // just to start the game
+  private gameState = inject(GameStateService);
+  private gameManager = inject(GameManagerService); // just to start the game
 
   constructor() {
-    const obstacles = this.generateRandomObstacles();
-    this.gameState.addObstacles(obstacles);
+    // const obstacles = this.generateRandomObstacles();
+    // this.gameState.addObstacles(obstacles);
+  }
+
+  start() {
+    const code = 'console.log("hello")';
+    this.gameManager.start(this.text);
   }
 
   private generateRandomObstacles() {
