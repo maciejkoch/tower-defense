@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ReplaySubject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { GameAction } from './actions/actions';
 import { BoardEvent } from './events/event.model';
 
@@ -7,10 +7,10 @@ import { BoardEvent } from './events/event.model';
   providedIn: 'root',
 })
 export class BoardCommunicatorService {
-  private _action$ = new ReplaySubject<GameAction>();
-  private _event$ = new ReplaySubject<BoardEvent>();
+  private _action$ = new Subject<GameAction>();
+  private _event$ = new Subject<BoardEvent>();
 
-  private _start$ = new ReplaySubject<void>();
+  private _start$ = new Subject<void>();
 
   get action$() {
     return this._action$.asObservable();

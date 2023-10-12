@@ -30,16 +30,13 @@ export class AppComponent {
     `;
 
   private gameState = inject(GameStateService);
-  private gameManager = inject(GameManagerService); // just to start the game
-
-  constructor() {
-    // const obstacles = this.generateRandomObstacles();
-    // this.gameState.addObstacles(obstacles);
-  }
+  private gameManager = inject(GameManagerService);
 
   start() {
-    const code = 'console.log("hello")';
     this.gameManager.start(this.text);
+
+    const obstacles = this.generateRandomObstacles();
+    this.gameState.addObstacles(obstacles);
   }
 
   private generateRandomObstacles() {

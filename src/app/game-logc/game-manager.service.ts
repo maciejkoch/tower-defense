@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { Subject, switchMap, tap } from 'rxjs';
 import { config, enemyGoal, enemyStart } from '../config';
 import { GameObject } from '../game-engine/model/game-object.model';
 import {
@@ -39,29 +40,41 @@ export class GameManagerService {
   private currentEnemyHp = 50;
   private hpProgress = 4;
 
+  private game$ = new Subject<string>();
+
+  constructor() {
+    this.game$
+      .pipe(
+        switchMap((code) => {
+          const algorithm = this.createAlgorithm(code);
+
+          this.enemyCreationTimer = 0;
+          this.currentEnemyHp = 50;
+
+          this.gameState.startGame();
+          return this.gameState.boardEvent$.pipe(
+            tap((event) => {
+              switch (event.type) {
+                case 'CLICK':
+                  const { tilePosition, gameObject } = event.payload;
+                  this.onClick(tilePosition, gameObject);
+                  break;
+                case 'CURSOR':
+                  this.onCursor(event.payload);
+                  break;
+                case 'UPDATE':
+                  this.update(event.payload, algorithm);
+                  break;
+              }
+            })
+          );
+        })
+      )
+      .subscribe();
+  }
+
   start(algorithmCode: string) {
-    const algorithm = this.createAlgorithm(algorithmCode);
-
-    if (!algorithm) {
-      return;
-    }
-
-    this.gameState.startGame();
-
-    this.gameState.boardEvent$.subscribe((event) => {
-      switch (event.type) {
-        case 'CLICK':
-          const { tilePosition, gameObject } = event.payload;
-          this.onClick(tilePosition, gameObject);
-          break;
-        case 'CURSOR':
-          this.onCursor(event.payload);
-          break;
-        case 'UPDATE':
-          this.update(event.payload, algorithm);
-          break;
-      }
-    });
+    this.game$.next(algorithmCode);
   }
 
   private buildTower(tower: Tower) {
@@ -75,27 +88,22 @@ export class GameManagerService {
   private onCursor(position: TilePosition) {}
 
   private onClick(position: TilePosition, gameObject?: GameObject) {
-    const mode = this.gameState.selectModeSnapshot();
-    const money = this.gameState.selectMoneySnapshot();
-    const isTileAvailable = !gameObject;
-
-    if (mode === 'BUILD' && isTileAvailable) {
-      this.tryBuildTower(position);
-    }
+    this.tryBuildTower(position);
   }
 
   tryBuildTower(position: TilePosition) {
     const money = this.gameState.selectMoneySnapshot();
     const hasMoney = money >= 20;
     const isPathValid = this.isBlockingPath(position);
+    const isTileEmpty = this.isTileEmpty(position);
 
-    if (hasMoney && isPathValid) {
+    if (hasMoney && isPathValid && isTileEmpty) {
       const tower = createTower(position, 20);
       this.buildTower(tower);
     }
   }
 
-  private update(secondsPassed: number, algorithm: GameAlghoritm) {
+  private update(secondsPassed: number, algorithm?: GameAlghoritm) {
     const towers = this.gameState.selectTowersSnapshot();
     const bullets = this.gameState.selectBulletsSnapshot();
     const enemies = this.gameState.selectEnemiesSnapshot();
@@ -195,13 +203,15 @@ export class GameManagerService {
       start: enemyStart,
     };
 
-    try {
-      const position = algorithm(state);
-      if (position) {
-        this.tryBuildTower(position);
+    if (algorithm) {
+      try {
+        const position = algorithm(state);
+        if (position) {
+          this.tryBuildTower(position);
+        }
+      } catch {
+        console.error('error in algorithm');
       }
-    } catch {
-      console.error('error in algorithm');
     }
   }
 
@@ -247,5 +257,17 @@ export class GameManagerService {
     );
 
     return path.length > 0;
+  }
+
+  private isTileEmpty(position: TilePosition) {
+    const obstacles = this.gameState.selectObstaclesSnapshot();
+    const towers = this.gameState.selectTowersSnapshot();
+    const enemies = this.gameState.selectEnemiesSnapshot();
+
+    const staticObjects = [...obstacles, ...towers, ...enemies];
+    return !staticObjects.some((obstacle) => {
+      const { x, y } = obstacle.getTilePosition();
+      return x === position.x && y === position.y;
+    });
   }
 }
