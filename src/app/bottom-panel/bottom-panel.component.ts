@@ -12,13 +12,4 @@ export class BottomPanelComponent {
   credits$ = this.gameState.credits$;
   kills$ = this.gameState.kills$;
   money$ = this.gameState.money$;
-  mode$ = this.gameState.mode$;
-
-  enableBuildMode() {
-    this.gameState.setMode('BUILD');
-  }
-
-  enableNormalMode() {
-    this.gameState.setMode('NORMAL');
-  }
 }

@@ -1,12 +1,11 @@
 import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, map } from 'rxjs';
 import { BoardCommunicatorService } from '../game-comunication/board-communicator.service';
 import { Bullet } from '../game-logc/bullet/bullet.model';
 import { Enemy } from '../game-logc/enemy/enemy.model';
 import { Obstacle } from '../game-logc/obstacle/obstacle.model';
 import { Tower } from '../game-logc/tower/tower.model';
-
-export type GameMode = 'NORMAL' | 'BUILD';
+import { GameState } from './game-state.model';
 
 @Injectable({
   providedIn: 'root',
@@ -14,82 +13,86 @@ export type GameMode = 'NORMAL' | 'BUILD';
 export class GameStateService {
   private boardCommunicatorService = inject(BoardCommunicatorService);
 
-  private _creadits$ = new BehaviorSubject(10);
-  private _kills$ = new BehaviorSubject(0);
-  private _money$ = new BehaviorSubject(100);
-  private _mode$ = new BehaviorSubject<GameMode>('BUILD');
+  private defaultState: GameState = {
+    money: 100,
+    credits: 10,
+    kills: 10,
+    towers: [],
+    enemies: [],
+    obstacles: [],
+    bullets: [],
+  };
 
-  private _obstacles$ = new BehaviorSubject<Obstacle[]>([]);
-  private _towers$ = new BehaviorSubject<Tower[]>([]);
-  private _bullet$ = new BehaviorSubject<Bullet[]>([]);
-  private _enemies$ = new BehaviorSubject<Enemy[]>([]);
+  private state$ = new BehaviorSubject(this.defaultState);
 
   get kills$() {
-    return this._kills$.asObservable();
+    return this.state$.pipe(map((state) => state.kills));
   }
 
   get money$() {
-    return this._money$.asObservable();
-  }
-
-  get mode$() {
-    return this._mode$.asObservable();
+    return this.state$.pipe(map((state) => state.money));
   }
 
   get credits$() {
-    return this._creadits$.asObservable();
+    return this.state$.pipe(map((state) => state.credits));
   }
 
   get boardEvent$() {
     return this.boardCommunicatorService.event$;
   }
 
-  selectMoneySnapshot() {
-    return this._money$.value;
+  startGame() {
+    this.state$.next(this.defaultState);
+    this.boardCommunicatorService.startGame();
   }
 
-  selectModeSnapshot() {
-    return this._mode$.value;
+  selectMoneySnapshot() {
+    return this.state$.value.money;
   }
 
   selectObstaclesSnapshot() {
-    return this._obstacles$.value;
+    return this.state$.value.obstacles;
   }
 
   selectTowersSnapshot() {
-    return this._towers$.value;
+    return this.state$.value.towers;
   }
 
   selectBulletsSnapshot() {
-    return this._bullet$.value;
+    return this.state$.value.bullets;
   }
 
   selectEnemiesSnapshot() {
-    return this._enemies$.value;
+    return this.state$.value.enemies;
   }
 
   addKill() {
-    this._kills$.next(this._kills$.value + 1);
+    const state = this.state$.value;
+    this.state$.next({ ...state, kills: state.kills + 1 });
   }
 
   addMoney(amount: number) {
-    this._money$.next(this._money$.value + amount);
+    const state = this.state$.value;
+    this.state$.next({ ...state, money: state.money + amount });
   }
 
   substractMoney(amount: number) {
-    this._money$.next(this._money$.value - amount);
+    const state = this.state$.value;
+    this.state$.next({ ...state, money: state.money - amount });
   }
 
   substractCredits() {
-    this._creadits$.next(this._creadits$.value - 1);
-  }
-
-  setMode(mode: GameMode) {
-    this._mode$.next(mode);
+    const state = this.state$.value;
+    this.state$.next({ ...state, credits: state.credits - 1 });
   }
 
   addObstacles(obstacles: Obstacle[]) {
-    this._obstacles$.next([...this._obstacles$.value, ...obstacles]);
+    const state = this.state$.value;
+    this.state$.next({
+      ...state,
+      obstacles: [...state.obstacles, ...obstacles],
+    });
+
     this.boardCommunicatorService.dispatch({
       type: 'ADD_GAME_OBJECT',
       payload: obstacles,
@@ -97,7 +100,9 @@ export class GameStateService {
   }
 
   addTower(tower: Tower) {
-    this._towers$.next([...this._towers$.value, tower]);
+    const state = this.state$.value;
+    this.state$.next({ ...state, towers: [...state.towers, tower] });
+
     this.boardCommunicatorService.dispatch({
       type: 'ADD_GAME_OBJECT',
       payload: tower,
@@ -105,7 +110,9 @@ export class GameStateService {
   }
 
   addBullet(bullet: Bullet) {
-    this._bullet$.next([...this._bullet$.value, bullet]);
+    const state = this.state$.value;
+    this.state$.next({ ...state, bullets: [...state.bullets, bullet] });
+
     this.boardCommunicatorService.dispatch({
       type: 'ADD_GAME_OBJECT',
       payload: bullet,
@@ -113,8 +120,9 @@ export class GameStateService {
   }
 
   removeBullet(bullet: Bullet) {
-    const bullets = this._bullet$.value.filter((item) => item !== bullet);
-    this._bullet$.next(bullets);
+    const state = this.state$.value;
+    const bullets = state.bullets.filter((item) => item !== bullet);
+    this.state$.next({ ...state, bullets });
 
     this.boardCommunicatorService.dispatch({
       type: 'REMOVE_GAME_OBJECT',
@@ -123,7 +131,9 @@ export class GameStateService {
   }
 
   addEnemy(enemy: Enemy) {
-    this._enemies$.next([...this._enemies$.value, enemy]);
+    const state = this.state$.value;
+    this.state$.next({ ...state, enemies: [...state.enemies, enemy] });
+
     this.boardCommunicatorService.dispatch({
       type: 'ADD_GAME_OBJECT',
       payload: enemy,
@@ -131,8 +141,9 @@ export class GameStateService {
   }
 
   removeEnemy(enemy: Enemy) {
-    const enemies = this._enemies$.value.filter((item) => item !== enemy);
-    this._enemies$.next(enemies);
+    const state = this.state$.value;
+    const enemies = state.enemies.filter((item) => item !== enemy);
+    this.state$.next({ ...state, enemies });
 
     this.boardCommunicatorService.dispatch({
       type: 'REMOVE_GAME_OBJECT',

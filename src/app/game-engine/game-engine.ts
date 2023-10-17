@@ -13,13 +13,19 @@ export interface GameDrawObject {
   };
 }
 
+export interface GameEngine {
+  startGame: () => void;
+  stopGame: () => void;
+  handleAction: (action: GameAction) => void;
+}
+
 export function createGame(
   canvas: HTMLCanvasElement,
   emitEvent: (event: BoardEvent) => void
-) {
+): GameEngine {
   const ctx = canvas.getContext('2d');
 
-  let fps = 0;
+  let isRunning = false;
 
   let secondsPassed = 0;
   let oldTimeStamp = 0;
@@ -71,9 +77,10 @@ export function createGame(
   });
 
   function gameLoop(timeStamp: number = 0) {
+    if (!isRunning) return;
+
     secondsPassed = (timeStamp - oldTimeStamp) / 1000;
     oldTimeStamp = timeStamp;
-    fps = Math.round(1 / secondsPassed);
 
     sortTimer += secondsPassed;
 
@@ -161,7 +168,12 @@ export function createGame(
   }
 
   function startGame() {
+    isRunning = true;
     gameLoop();
+  }
+
+  function stopGame() {
+    isRunning = false;
   }
 
   function handleAction(action: GameAction) {
@@ -180,6 +192,7 @@ export function createGame(
 
   return {
     startGame,
+    stopGame,
     handleAction,
   };
 }

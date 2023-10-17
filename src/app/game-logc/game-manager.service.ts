@@ -1,4 +1,6 @@
 import { Injectable, inject } from '@angular/core';
+import { Subject, switchMap, tap } from 'rxjs';
+import * as ts from 'typescript';
 import { config, enemyGoal, enemyStart } from '../config';
 import { GameObject } from '../game-engine/model/game-object.model';
 import {
@@ -15,6 +17,19 @@ import { calculateAngle, calculateTarget } from './move/move-object';
 import { createTower } from './tower/tower-factory';
 import { Tower } from './tower/tower.model';
 
+interface AlghoritmGameState {
+  money: number;
+  towers: TilePosition[];
+  enemies: TilePosition[];
+  obstacles: TilePosition[];
+  goal: TilePosition;
+  start: TilePosition;
+}
+
+export type GameAlghoritm = (
+  gameState: AlghoritmGameState
+) => TilePosition | undefined;
+
 @Injectable({
   providedIn: 'root',
 })
@@ -26,21 +41,41 @@ export class GameManagerService {
   private currentEnemyHp = 50;
   private hpProgress = 4;
 
+  private game$ = new Subject<string>();
+
   constructor() {
-    this.gameState.boardEvent$.subscribe((event) => {
-      switch (event.type) {
-        case 'CLICK':
-          const { tilePosition, gameObject } = event.payload;
-          this.onClick(tilePosition, gameObject);
-          break;
-        case 'CURSOR':
-          this.onCursor(event.payload);
-          break;
-        case 'UPDATE':
-          this.update(event.payload);
-          break;
-      }
-    });
+    this.game$
+      .pipe(
+        switchMap((code) => {
+          const algorithm = this.createAlgorithm(code);
+
+          this.enemyCreationTimer = 0;
+          this.currentEnemyHp = 50;
+
+          this.gameState.startGame();
+          return this.gameState.boardEvent$.pipe(
+            tap((event) => {
+              switch (event.type) {
+                case 'CLICK':
+                  const { tilePosition, gameObject } = event.payload;
+                  this.onClick(tilePosition, gameObject);
+                  break;
+                case 'CURSOR':
+                  this.onCursor(event.payload);
+                  break;
+                case 'UPDATE':
+                  this.update(event.payload, algorithm);
+                  break;
+              }
+            })
+          );
+        })
+      )
+      .subscribe();
+  }
+
+  start(algorithmCode: string) {
+    this.game$.next(algorithmCode);
   }
 
   private buildTower(tower: Tower) {
@@ -54,23 +89,22 @@ export class GameManagerService {
   private onCursor(position: TilePosition) {}
 
   private onClick(position: TilePosition, gameObject?: GameObject) {
-    const mode = this.gameState.selectModeSnapshot();
+    this.tryBuildTower(position);
+  }
+
+  tryBuildTower(position: TilePosition) {
     const money = this.gameState.selectMoneySnapshot();
+    const hasMoney = money >= 20;
+    const isPathValid = this.isBlockingPath(position);
+    const isTileEmpty = this.isTileEmpty(position);
 
-    if (mode === 'BUILD') {
+    if (hasMoney && isPathValid && isTileEmpty) {
       const tower = createTower(position, 20);
-
-      const hasMoney = money >= tower.price;
-      const isPathValid = this.isBlockingPath(tower);
-      const isTileAvailable = !gameObject;
-
-      if (hasMoney && isPathValid && isTileAvailable) {
-        this.buildTower(tower);
-      }
+      this.buildTower(tower);
     }
   }
 
-  private update(secondsPassed: number) {
+  private update(secondsPassed: number, algorithm?: GameAlghoritm) {
     const towers = this.gameState.selectTowersSnapshot();
     const bullets = this.gameState.selectBulletsSnapshot();
     const enemies = this.gameState.selectEnemiesSnapshot();
@@ -153,6 +187,45 @@ export class GameManagerService {
         this.gameState.removeEnemy(enemy);
       }
     });
+
+    // ----------------------
+    const state: AlghoritmGameState = {
+      money: this.gameState.selectMoneySnapshot(),
+      towers: this.gameState
+        .selectTowersSnapshot()
+        .map((tower) => tower.position),
+      enemies: this.gameState
+        .selectEnemiesSnapshot()
+        .map((enemy) => enemy.position),
+      obstacles: this.gameState
+        .selectObstaclesSnapshot()
+        .map((obstacle) => obstacle.position),
+      goal: enemyGoal,
+      start: enemyStart,
+    };
+
+    if (algorithm) {
+      try {
+        const position = algorithm(state);
+        if (position) {
+          this.tryBuildTower(position);
+        }
+      } catch {
+        console.error('error in algorithm');
+      }
+    }
+  }
+
+  private createAlgorithm(code: string): GameAlghoritm | undefined {
+  
+    try {
+      const executableCode = code + ' return algorithm()';
+      const trasnspiled = ts.transpile(executableCode);
+      return new Function(trasnspiled)();
+    } catch (error) {
+      console.error('error in algorithm', error);
+      return undefined;
+    }
   }
 
   private setEnemiesTarget(enemies: Enemy[]) {
@@ -161,7 +234,9 @@ export class GameManagerService {
     });
   }
 
-  private buildGridWithObstacles(additionalTowers: Tower[] = []) {
+  private buildGridWithObstacles(
+    additionalObstacles: { position: TilePosition }[] = []
+  ) {
     const obstacles = this.gameState.selectObstaclesSnapshot();
     const towers = this.gameState.selectTowersSnapshot();
 
@@ -169,7 +244,7 @@ export class GameManagerService {
       Array.from({ length: config.width / config.tile }, () => 0)
     );
 
-    const staticObjects = [...obstacles, ...towers, ...additionalTowers];
+    const staticObjects = [...obstacles, ...towers, ...additionalObstacles];
     staticObjects.forEach((obstacle) => {
       const { x, y } = obstacle.position;
       grid[y][x] = 1;
@@ -178,13 +253,25 @@ export class GameManagerService {
     return grid;
   }
 
-  private isBlockingPath(tower: Tower) {
+  private isBlockingPath(position: TilePosition) {
     const path = calculateTarget(
       enemyStart,
       enemyGoal,
-      this.buildGridWithObstacles([tower])
+      this.buildGridWithObstacles([{ position }])
     );
 
     return path.length > 0;
+  }
+
+  private isTileEmpty(position: TilePosition) {
+    const obstacles = this.gameState.selectObstaclesSnapshot();
+    const towers = this.gameState.selectTowersSnapshot();
+    const enemies = this.gameState.selectEnemiesSnapshot();
+
+    const staticObjects = [...obstacles, ...towers, ...enemies];
+    return !staticObjects.some((obstacle) => {
+      const { x, y } = obstacle.getTilePosition();
+      return x === position.x && y === position.y;
+    });
   }
 }

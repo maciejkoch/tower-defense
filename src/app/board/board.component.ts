@@ -1,8 +1,8 @@
 import { Component, inject } from '@angular/core';
-import { BoardCommunicatorService } from '../game-comunication/board-communicator.service';
+import { switchMap, tap } from 'rxjs/operators';
 import { config } from '../config';
-import { createGame } from '../game-engine/game-engine';
-
+import { BoardCommunicatorService } from '../game-comunication/board-communicator.service';
+import { GameEngine, createGame } from '../game-engine/game-engine';
 @Component({
   selector: 'app-board',
   templateUrl: './board.component.html',
@@ -11,17 +11,25 @@ import { createGame } from '../game-engine/game-engine';
 export class BoardComponent {
   boardCommunicatorService = inject(BoardCommunicatorService);
 
+  private game?: GameEngine;
+
   config = config;
 
-  ngAfterViewInit() {
-    const canvas = document.getElementById('board') as HTMLCanvasElement;
-    const { startGame, handleAction } = createGame(canvas, (event) =>
-      this.boardCommunicatorService.emitEvent(event)
-    );
-    startGame();
+  constructor() {
+    this.boardCommunicatorService.start$
+      .pipe(
+        tap(() => {
+          this.game?.stopGame();
 
-    this.boardCommunicatorService.action$.subscribe((action) => {
-      handleAction(action);
-    });
+          const canvas = document.getElementById('board') as HTMLCanvasElement;
+          this.game = createGame(canvas, (event) =>
+            this.boardCommunicatorService.emitEvent(event)
+          );
+
+          this.game.startGame();
+        }),
+        switchMap(() => this.boardCommunicatorService.action$)
+      )
+      .subscribe((action) => this.game?.handleAction(action));
   }
 }

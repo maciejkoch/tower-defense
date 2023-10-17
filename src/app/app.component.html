@@ -1,4 +1,6 @@
 <div class="game">
+  <button (click)="start()">Start</button>
+  <app-code-editor [(code)]="code" [typings]="typings"></app-code-editor>
   <app-board class="game__board"></app-board>
   <app-bottom-panel class="game__bottom-panel"></app-bottom-panel>
 </div>

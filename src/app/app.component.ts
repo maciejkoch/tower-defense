@@ -12,11 +12,47 @@ import { GameStateService } from './game-state/game-state.service';
 })
 export class AppComponent {
   title = 'tower-defense';
+  typings = `
+    interface TilePosition {
+      x: number;
+      y: number;
+    }
+    
+    interface AlghoritmGameState {
+      money: number;
+      towers: TilePosition[];
+      enemies: TilePosition[];
+      obstacles: TilePosition[];
+      goal: TilePosition;
+      start: TilePosition;
+    }
+    
+    type Alghoritm = (state: AlghoritmGameState) => TilePosition | undefined;
 
-  gameState = inject(GameStateService);
-  gameManeger = inject(GameManagerService); // just to start the game
+    `;
+  code = `
+    function algorithm(): Alghoritm {
+      return (state: AlghoritmGameState) => {
+      const { money, towers, enemies, obstacles, goal, start } = state;
+      const occupiedTiles = [...towers, ...enemies, ...obstacles];
+        
+      const ys = occupiedTiles.map((tile) => tile.y);
+      let y = 0;
+      while (ys.includes(y)) {
+        y++;
+      }   
+        
+      const x = 1;
+      return { x, y };
+    }}
+    `;
 
-  constructor() {
+  private gameState = inject(GameStateService);
+  private gameManager = inject(GameManagerService);
+
+  start() {
+    this.gameManager.start(this.code);
+
     const obstacles = this.generateRandomObstacles();
     this.gameState.addObstacles(obstacles);
   }
