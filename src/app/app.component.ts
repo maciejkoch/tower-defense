@@ -12,28 +12,46 @@ import { GameStateService } from './game-state/game-state.service';
 })
 export class AppComponent {
   title = 'tower-defense';
-  text = `
-  
-      return (state) => {
-        const { money, towers, enemies, obstacles, goal, start } = state;
-        const occupiedTiles = [...towers, ...enemies, ...obstacles];
+  typings = `
+    interface TilePosition {
+      x: number;
+      y: number;
+    }
     
-        const ys = occupiedTiles.map((tile) => tile.y);
-        let y = 0;
-        while (ys.includes(y)) {
-          y++;
-        }
+    interface AlghoritmGameState {
+      money: number;
+      towers: TilePosition[];
+      enemies: TilePosition[];
+      obstacles: TilePosition[];
+      goal: TilePosition;
+      start: TilePosition;
+    }
     
-        const x = 1;
-        return { x, y };
-      }
+    type Alghoritm = (state: AlghoritmGameState) => TilePosition | undefined;
+
+    `;
+  code = `
+    function algorithm(): Alghoritm {
+      return (state: AlghoritmGameState) => {
+      const { money, towers, enemies, obstacles, goal, start } = state;
+      const occupiedTiles = [...towers, ...enemies, ...obstacles];
+        
+      const ys = occupiedTiles.map((tile) => tile.y);
+      let y = 0;
+      while (ys.includes(y)) {
+        y++;
+      }   
+        
+      const x = 1;
+      return { x, y };
+    }}
     `;
 
   private gameState = inject(GameStateService);
   private gameManager = inject(GameManagerService);
 
   start() {
-    this.gameManager.start(this.text);
+    this.gameManager.start(this.code);
 
     const obstacles = this.generateRandomObstacles();
     this.gameState.addObstacles(obstacles);

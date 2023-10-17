@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Subject, switchMap, tap } from 'rxjs';
+import * as ts from 'typescript';
 import { config, enemyGoal, enemyStart } from '../config';
 import { GameObject } from '../game-engine/model/game-object.model';
 import {
@@ -216,10 +217,13 @@ export class GameManagerService {
   }
 
   private createAlgorithm(code: string): GameAlghoritm | undefined {
+  
     try {
-      return new Function(code)();
-    } catch {
-      console.error('error in algorithm');
+      const executableCode = code + ' return algorithm()';
+      const trasnspiled = ts.transpile(executableCode);
+      return new Function(trasnspiled)();
+    } catch (error) {
+      console.error('error in algorithm', error);
       return undefined;
     }
   }
