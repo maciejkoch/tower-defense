@@ -4,6 +4,15 @@ import { GameManagerService } from './game-logc/game-manager.service';
 import { creatObstacle } from './game-logc/obstacle/obstacle-factory';
 import { GameStateService } from './game-state/game-state.service';
 
+import {
+  Auth,
+  GithubAuthProvider,
+  User,
+  onAuthStateChanged,
+  signInWithPopup,
+} from '@angular/fire/auth';
+import { BehaviorSubject } from 'rxjs';
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -49,12 +58,25 @@ export class AppComponent {
 
   private gameState = inject(GameStateService);
   private gameManager = inject(GameManagerService);
+  private auth = inject(Auth);
+  user$ = new BehaviorSubject<User | null>(null);
+
+  constructor() {
+    onAuthStateChanged(this.auth, (user) => {
+      this.user$.next(user);
+    });
+  }
 
   start() {
     this.gameManager.start(this.code);
 
     const obstacles = this.generateRandomObstacles();
     this.gameState.addObstacles(obstacles);
+  }
+
+  async signIn() {
+    const user = await signInWithPopup(this.auth, new GithubAuthProvider());
+    console.log('user', user);
   }
 
   private generateRandomObstacles() {
