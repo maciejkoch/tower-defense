@@ -1,5 +1,14 @@
 {
   "projects": {
     "default": "tower-defense-8b799"
+  },
+  "targets": {
+    "tower-defense-8b799": {
+      "hosting": {
+        "tower-defense": [
+          "tower-defense-8b799"
+        ]
+      }
+    }
   }
 }

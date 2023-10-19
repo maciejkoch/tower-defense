@@ -1,4 +1,6 @@
 <div class="game">
+  <button (click)="signIn()">Sign in</button>
+  {{ (user$ | async)?.email }}
   <button (click)="start()">Start</button>
   <app-code-editor [(code)]="code" [typings]="typings"></app-code-editor>
   <app-board class="game__board"></app-board>
